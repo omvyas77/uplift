@@ -1,0 +1,220 @@
+{
+  "outcome": "visit",
+  "n": 13979592,
+  "n_treatment": 11882655,
+  "n_control": 2096937,
+  "srm": {
+    "n_treatment": 11882655,
+    "n_control": 2096937,
+    "observed_ratio": 0.8500001287591226,
+    "expected_ratio": 0.85,
+    "chi2": 1.817775848947767e-06,
+    "p_value": 0.9989242531217909,
+    "is_srm": false,
+    "abs_deviation": 1.2875912258625277e-07,
+    "ratio_ci": [
+      0.8498128420968949,
+      0.8501872704580005
+    ],
+    "detectable_deviation_at_80pct_power": 0.000394624194635998
+  },
+  "srm_calibration_null": {
+    "n_per_sim": 200000.0,
+    "true_ratio": 0.85,
+    "designed_ratio": 0.85,
+    "rejection_rate_at_0.001": 0.002,
+    "rejection_rate_at_0.05": 0.063
+  },
+  "srm_calibration_alt": {
+    "n_per_sim": 200000.0,
+    "true_ratio": 0.8505,
+    "designed_ratio": 0.85,
+    "rejection_rate_at_0.001": 0.004,
+    "rejection_rate_at_0.05": 0.121
+  },
+  "balance": [
+    {
+      "feature": "f3",
+      "mean_treatment": 4.169411640899901,
+      "mean_control": 4.232820957687828,
+      "smd": -0.04883634026324019,
+      "var_ratio": 1.1856811617333507,
+      "balanced": true
+    },
+    {
+      "feature": "f6",
+      "mean_treatment": -4.1827923926987065,
+      "mean_control": -3.9998797265488255,
+      "smd": -0.04044806888649284,
+      "var_ratio": 1.072849870573535,
+      "balanced": true
+    },
+    {
+      "feature": "f5",
+      "mean_treatment": 4.0266023053078985,
+      "mean_control": 4.039338647301743,
+      "smd": -0.030556830660414907,
+      "var_ratio": 1.2208842777809092,
+      "balanced": true
+    },
+    {
+      "feature": "f9",
+      "mean_treatment": 16.05258862254133,
+      "mean_control": 15.886252389523134,
+      "smd": 0.02400105773455969,
+      "var_ratio": 1.0761034563732315,
+      "balanced": true
+    },
+    {
+      "feature": "f1",
+      "mean_treatment": 10.070336468853249,
+      "mean_control": 10.067935192469877,
+      "smd": 0.023994400679302374,
+      "var_ratio": 1.3164475024982383,
+      "balanced": true
+    },
+    {
+      "feature": "f8",
+      "mean_treatment": 3.933391878647928,
+      "mean_control": 3.9346517722432726,
+      "smd": -0.022433335895262342,
+      "var_ratio": 1.0520231399589883,
+      "balanced": true
+    },
+    {
+      "feature": "f7",
+      "mean_treatment": 5.105555333120273,
+      "mean_control": 5.080284340120637,
+      "smd": 0.02126952997581918,
+      "var_ratio": 1.08632112383574,
+      "balanced": true
+    },
+    {
+      "feature": "f10",
+      "mean_treatment": 5.333659929290435,
+      "mean_control": 5.331898215658715,
+      "smd": 0.010563463240729275,
+      "var_ratio": 1.051298811176425,
+      "balanced": true
+    },
+    {
+      "feature": "f4",
+      "mean_treatment": 10.339245221446188,
+      "mean_control": 10.33652566617022,
+      "smd": 0.007965661878540847,
+      "var_ratio": 1.0323536839753715,
+      "balanced": true
+    },
+    {
+      "feature": "f0",
+      "mean_treatment": 19.614754927917357,
+      "mean_control": 19.651704598341983,
+      "smd": -0.006865618372250798,
+      "var_ratio": 0.9953477514439066,
+      "balanced": true
+    },
+    {
+      "feature": "f2",
+      "mean_treatment": 8.446301724837399,
+      "mean_control": 8.448173251434486,
+      "smd": -0.00624099454533799,
+      "var_ratio": 0.9893749495350633,
+      "balanced": true
+    },
+    {
+      "feature": "f11",
+      "mean_treatment": -0.17098480762494814,
+      "mean_control": -0.17086775002078694,
+      "smd": -0.0051595279790242286,
+      "var_ratio": 1.0373402677420216,
+      "balanced": true
+    }
+  ],
+  "max_abs_smd": 0.04883634026324019,
+  "ate": {
+    "difference_in_means": {
+      "method": "difference-in-means",
+      "ate": 0.010342403129198284,
+      "se": 0.00014631645066032718,
+      "ci_low": 0.010055628155558312,
+      "ci_high": 0.010629178102838257,
+      "p_value": 0.0,
+      "relative_lift": 0.27073675539019604,
+      "relative_ci": [
+        0.2615661724130989,
+        0.27997400121382365
+      ],
+      "baseline_rate": 0.03820095691954503,
+      "n": 13979592
+    },
+    "lin": {
+      "method": "Lin regression-adjusted",
+      "ate": 0.007760348467456981,
+      "se": 0.0003463579807523817,
+      "ci_low": 0.007081499299424296,
+      "ci_high": 0.008439197635489667,
+      "p_value": 3.473099020374586e-111,
+      "relative_lift": 0.20243674041784976,
+      "relative_ci": [
+        0.18472825562645237,
+        0.22014522520924715
+      ],
+      "baseline_rate": 0.03833468396813169,
+      "n": 2000000,
+      "n_used": 2000000
+    },
+    "cupac": {
+      "method": "CUPAC-adjusted",
+      "ate": 0.00791933967721644,
+      "se": 0.0003231940660133558,
+      "ci_low": 0.007285890947813202,
+      "ci_high": 0.008552788406619678,
+      "p_value": 1.3603100126773434e-132,
+      "relative_lift": 0.2097331875095646,
+      "relative_ci": [
+        0.1929571396878197,
+        0.22650923533130948
+      ],
+      "baseline_rate": 0.03775911562329776,
+      "n": 2000000,
+      "n_used": 2000000
+    }
+  },
+  "cuped": {
+    "theta": 1.0495052423962137,
+    "correlation": 0.5563046531338058,
+    "variance_reduction": 0.30947486709838357,
+    "se_before": 0.0003853855675153188,
+    "se_after": 0.0003231940660133558,
+    "se_reduction": 0.16137475490565922,
+    "effective_sample_multiplier": 1.448173212462169,
+    "n_used": 2000000
+  },
+  "power": {
+    "mde_absolute": 0.00040223586174112635,
+    "mde_relative": 0.010529470834677639,
+    "n_total": 13979592,
+    "treatment_share": 0.85,
+    "baseline_rate": 0.03820095691954503,
+    "power": 0.8,
+    "alpha": 0.05,
+    "allocation_efficiency": 0.51,
+    "n_equivalent_balanced": 7129591
+  },
+  "allocation_table": [
+    {
+      "treatment_share": 0.5,
+      "allocation_efficiency": 1.0,
+      "variance_multiple_vs_balanced": 1.0,
+      "mde_relative_pct": 0.7519546235627971,
+      "n_multiple_for_same_mde": 1.0
+    },
+    {
+      "treatment_share": 0.85,
+      "allocation_efficiency": 0.51,
+      "variance_multiple_vs_balanced": 1.9607843137254897,
+      "mde_relative_pct": 1.052947083467764,
+      "n_multiple_for_same_mde": 1.9607843137254901
+    }
+  ]
+}

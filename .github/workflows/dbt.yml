@@ -1,0 +1,22 @@
+name: dbt
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dbt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --frozen --extra dbt
+      - run: uv run dbt deps
+      - run: uv run dbt seed --target ci
+      # The `ci` target is in-memory DuckDB over the committed 50k-row seed, so
+      # the whole project builds in seconds with no download. The balance
+      # tolerances are loosened because 50k rows cannot support the tight ones.
+      - run: uv run dbt build --target ci --vars '{"smd_tolerance": 0.05, "treatment_ratio_tolerance": 0.01, "split_tolerance": 0.02}'

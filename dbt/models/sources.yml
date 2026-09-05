@@ -1,0 +1,41 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: main
+    description: >
+      Criteo Uplift Prediction Dataset v2.1 (13,979,592 rows), assembled from
+      randomized incrementality trials. Loaded by `uplift ingest`, not by dbt.
+    tables:
+      - name: units
+        description: One row per randomized unit.
+        columns:
+          - name: unit_id
+            description: Stable surrogate key assigned once at ingestion and persisted to Parquet.
+            tests: [unique, not_null]
+          - name: treatment
+            description: Randomized assignment. THE instrument / the experiment.
+            tests:
+              - not_null
+              - accepted_values: {values: [0, 1]}
+          - name: exposure
+            description: >
+              POST-TREATMENT. Whether an ad was actually served. Never use as a
+              feature or a filter; conditioning on it breaks randomization and
+              inflates the effect. Used only as the compliance indicator for the
+              CACE / instrumental-variables estimand.
+            tests:
+              - not_null
+              - accepted_values: {values: [0, 1]}
+          - name: visit
+            description: Primary outcome. Base rate ~4.7%.
+            tests:
+              - not_null
+              - accepted_values: {values: [0, 1]}
+          - name: conversion
+            description: >
+              Secondary outcome. Base rate ~0.29%; too rare for stable uplift
+              ranking, so it is reported as a guardrail, never as the objective.
+            tests:
+              - not_null
+              - accepted_values: {values: [0, 1]}

@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: int_units_with_splits
+    description: Staged units plus the deterministic 60/20/20 hash bucket.
+    columns:
+      - name: unit_id
+        tests: [unique, not_null]
+      - name: split
+        tests:
+          - accepted_values: {values: ['train', 'valid', 'test']}
+      - name: bucket
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 99
+
+  - name: fct_experiment_units
+    description: Analysis-ready fact table, one row per randomized unit.
+    columns:
+      - name: unit_id
+        tests: [unique, not_null]
+      - name: is_exposed
+        description: POST-TREATMENT. Read only by the IV/CACE module.
+        tests: [not_null]
+
+  - name: mart_arm_summary
+    description: Per-split arm sizes, outcome rates, lift, and the IV first stage.
+    columns:
+      - name: split
+        tests: [unique, not_null]
+      - name: observed_treatment_ratio
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.84
+              max_value: 0.86
+      - name: compliance_rate
+        description: P(exposed | treated). The IV first stage. CACE = ITT / compliance_rate.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.01
+              max_value: 1.0
+      - name: visit_rate_lift_abs
+        description: Absolute ITT effect on the primary outcome, computed in SQL.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 0.05
+
+  - name: mart_covariate_balance
+    description: Standardized mean differences between arms, one row per feature.
+    columns:
+      - name: feature
+        tests: [unique, not_null]
+      - name: smd
+        description: >
+          Standardized mean difference between arms. Under a clean randomization
+          at n=14M every |SMD| should be under ~0.01.
+
+          TWO thresholds, deliberately, because this dataset needs two. The
+          WARN test at +/-0.02 is what a clean RCT should satisfy; it FAILS on
+          Criteo v2.1, where all 12 features are imbalanced (Welch |t| 6.9 to
+          67.2, all past a Bonferroni-corrected threshold). That failure is a
+          finding, documented in docs/findings.md, not something to silence by
+          widening the tolerance. The ERROR test at +/-0.10 is the matching
+          literature's "balanced" rule of thumb and is what actually blocks the
+          pipeline, here and in the Dagster asset check.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: "{{ -1 * var('smd_tolerance') }}"
+              max_value: "{{ var('smd_tolerance') }}"
+              config:
+                severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: "{{ -1 * var('smd_blocking_tolerance') }}"
+              max_value: "{{ var('smd_blocking_tolerance') }}"
+              config:
+                severity: error
+
+  - name: mart_uplift_deciles
+    columns:
+      - name: decile
+        tests: [unique, not_null]
+      - name: n_units
+        tests: [not_null]

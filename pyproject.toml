@@ -1,0 +1,93 @@
+[project]
+name = "uplift"
+version = "0.1.0"
+description = "Causal experimentation and uplift-modeling platform on randomized incrementality data"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+dependencies = [
+    "duckdb>=1.1",
+    "polars>=1.0",
+    "pandas>=2.2",
+    "numpy>=1.26,<3",
+    "scipy>=1.13",
+    "scikit-learn>=1.5",
+    "lightgbm>=4.5",
+    "statsmodels>=0.14",
+    "pyarrow>=17",
+    "pydantic>=2.8",
+    "pydantic-settings>=2.4",
+    "typer>=0.12",
+    "structlog>=24.1",
+    "matplotlib>=3.9",
+    "joblib>=1.4",
+]
+
+[project.optional-dependencies]
+causal = [
+    "econml>=0.15,<0.18",
+    "scikit-uplift>=0.5.1",
+]
+# Optional and isolated on purpose - see section 2.4 of the build guide.
+causal-extra = [
+    "causalml>=0.15,<0.18",
+]
+dbt = [
+    "dbt-core>=1.9",
+    "dbt-duckdb>=1.9",
+]
+metrics = [
+    "dbt-metricflow[duckdb]",
+]
+serve = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "streamlit>=1.38",
+    "plotly>=5.24",
+]
+orchestrate = [
+    "dagster>=1.8",
+    "dagster-webserver>=1.8",
+    "dagster-dbt>=0.24",
+]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "types-requests",
+    "pre-commit>=3.8",
+    "ipykernel",
+]
+
+[project.scripts]
+uplift = "uplift.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/uplift"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "PD", "NPY", "RUF"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = [
+    "slow: requires the full dataset; excluded from CI",
+    "stat: statistical test with a fixed seed and a tolerance",
+]
