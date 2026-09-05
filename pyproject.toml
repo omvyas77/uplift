@@ -91,3 +91,8 @@ markers = [
     "slow: requires the full dataset; excluded from CI",
     "stat: statistical test with a fixed seed and a tolerance",
 ]
+filterwarnings = [
+    # scikit-uplift 0.5.1 calls sklearn's deprecated stable_cumsum. Upstream,
+    # not ours, and noisy enough to hide real warnings.
+    "ignore:Function stable_cumsum is deprecated:FutureWarning",
+]

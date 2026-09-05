@@ -150,3 +150,23 @@ The 85/15 split is 51% as statistically efficient as a balanced one — half the
 sample is effectively wasted from a pure-precision standpoint. The design is
 still correct: a business does not withhold ads from half its users to tighten a
 confidence interval. The allocation buys revenue with precision.
+
+---
+
+## 7. Qini tie handling (an implementation finding, not a data one)
+
+The reference Qini implementation initially integrated the curve at every unit.
+That makes the result depend on the arbitrary ordering *within* a block of equal
+scores, and the standard property test — reversing the ranking must flip the
+sign — failed by 0.025 on a coefficient of 0.15.
+
+The cause is that a Qini curve is defined by **thresholds** on the score, so
+within a tied block there is no defined ordering and the curve should
+interpolate linearly across the block. The test case `tau = 0.05 * (x > 0)` has
+exactly two distinct score values, so the entire sample is two enormous ties —
+a worst case that a continuous score would never have exposed.
+
+Integrating at block boundaries instead fixes it: symmetry improves from 0.025
+to 6e-5, and the change is a no-op on continuous scores (verified). Kept as
+`tie_aware=True` with the alternative still reachable, and guarded by
+`test_reversed_ranking_flips_the_sign` and `test_tie_aware_curve_collapses_tied_blocks`.
