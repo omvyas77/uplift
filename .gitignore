@@ -1,0 +1,34 @@
+.venv/
+.venv-*/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Data: NEVER commit. Ship the download script instead.
+data/
+*.duckdb
+*.duckdb.wal
+*.csv
+*.csv.gz
+*.parquet
+!dbt/seeds/criteo_sample.csv
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+.user.yml
+
+# Artifacts
+artifacts/
+models/*.pkl
+models/*.joblib
+!models/.gitkeep
+
+.env
+.DS_Store
+.ipynb_checkpoints/

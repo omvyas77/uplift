@@ -1,0 +1,20 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.14
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        exclude: ^dbt/(profiles|packages)\.yml$
+      - id: check-added-large-files
+        # 8 MB, sized to admit the 6.2 MB dbt CI seed and nothing larger. This
+        # hook exists to stop the 311 MB source CSV from being committed, which
+        # is the usual way these repos become unclonable.
+        args: ["--maxkb=8000"]
+      - id: detect-private-key

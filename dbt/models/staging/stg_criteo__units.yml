@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: stg_criteo__units
+    description: >
+      Typed, renamed passthrough of the raw units. Renames are the only
+      transformation: treatment -> is_treated, exposure -> is_exposed,
+      visit -> visited, conversion -> converted.
+    columns:
+      - name: unit_id
+        tests: [unique, not_null]
+      - name: is_treated
+        tests: [not_null, {accepted_values: {values: [0, 1]}}]
+      - name: is_exposed
+        description: POST-TREATMENT. See sources.yml - never a feature, never a filter.
+        tests: [not_null, {accepted_values: {values: [0, 1]}}]
+      - name: visited
+        tests: [not_null, {accepted_values: {values: [0, 1]}}]
+      - name: converted
+        tests: [not_null, {accepted_values: {values: [0, 1]}}]

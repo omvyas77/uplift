@@ -1,0 +1,26 @@
+name: eval
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --frozen --extra causal --extra dev
+      - run: uv run uplift download && uv run uplift ingest
+      - run: uv run uplift train --sample 2000000
+      - run: uv run uplift evaluate
+      - name: Block on metric regression
+        run: uv run python scripts/check_regression.py evals/results.json evals/baseline.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: evals/

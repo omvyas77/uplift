@@ -1,0 +1,23 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --frozen --extra causal --extra dev
+      - name: ruff
+        run: |
+          uv run ruff check src tests orchestration scripts
+          uv run ruff format --check src tests orchestration scripts
+      - name: mypy
+        run: uv run mypy src
+      - name: tests
+        # Everything here runs on synthetic data with a known ground truth, so
+        # CI never downloads the 311 MB source file.
+        run: uv run pytest -m "not slow" --cov=src/uplift --cov-report=term-missing

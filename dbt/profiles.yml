@@ -1,0 +1,15 @@
+# Kept IN the repo so a cloner does not have to configure ~/.dbt/.
+uplift:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "../data/uplift.duckdb"
+      threads: 4
+      extensions: []
+    ci:
+      # In-memory: lets GitHub Actions build the whole project against the
+      # committed 50k-row seed in seconds, with no 311 MB download.
+      type: duckdb
+      path: ":memory:"
+      threads: 2
