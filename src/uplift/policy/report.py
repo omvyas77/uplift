@@ -74,7 +74,11 @@ def policy_report(
     # A production logging policy would require estimating it; say so.
     propensity = np.full(len(y), settings.designed_treatment_ratio)
 
-    pol = optimal_threshold(tau, settings.value_per_conversion_usd, settings.cost_per_treatment_usd)
+    # Price the outcome being optimised, not always a conversion - see
+    # Settings.value_per_outcome. Valuing an incremental VISIT at the price of a
+    # CONVERSION overstated expected profit by ~16x.
+    value = settings.value_per_outcome(outcome)
+    pol = optimal_threshold(tau, value, settings.cost_per_treatment_usd)
     X, _, _ = load_split(split, outcome=outcome)
     X = X[df.index.to_numpy()] if len(X) != len(df) else X
     mu0, mu1 = _outcome_models(X, w, y, settings.random_seed)
@@ -111,6 +115,9 @@ def policy_report(
         "model_predicted_policy": pol.to_dict(),
         "assumptions": {
             "value_per_conversion_usd": settings.value_per_conversion_usd,
+            "conversions_per_visit": settings.conversions_per_visit,
+            "value_per_outcome_usd": value,
+            "priced_outcome": outcome,
             "cost_per_treatment_usd": settings.cost_per_treatment_usd,
             "logging_propensity": settings.designed_treatment_ratio,
             "note": "propensity is KNOWN by design here; production logging would need it estimated",
@@ -121,9 +128,7 @@ def policy_report(
             "se": se_diff,
             "resolved": beats_random,
         },
-        "profit_curve": profit_curve(
-            tau, settings.value_per_conversion_usd, settings.cost_per_treatment_usd
-        ),
+        "profit_curve": profit_curve(tau, value, settings.cost_per_treatment_usd),
     }
 
     print(f"\nTARGETING POLICY + OFF-POLICY EVALUATION - model = {model}, n = {len(df):,}")
@@ -141,7 +146,9 @@ def policy_report(
         f"{'BEATS random' if beats_random else 'NOT distinguishable from random'}"
     )
     print(
-        f"\n  ASSUMPTIONS: ${settings.value_per_conversion_usd:.2f} per conversion, "
+        f"\n  ASSUMPTIONS: ${settings.value_per_conversion_usd:.2f} per conversion"
+        f" -> ${value:.4f} per incremental {outcome}"
+        f" (x{settings.conversions_per_visit:.4f} P(convert|visit)), "
         f"${settings.cost_per_treatment_usd:.2f} per treatment"
     )
     print(RULE)

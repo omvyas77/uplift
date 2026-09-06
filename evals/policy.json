@@ -1,0 +1,443 @@
+{
+  "model": "s_learner",
+  "outcome": "visit",
+  "split": "test",
+  "n": 1000000,
+  "threshold": 0.006521701875920414,
+  "model_predicted_policy": {
+    "threshold": 0.006521701875920414,
+    "treated_fraction": 0.180905,
+    "expected_incremental_outcomes": 7251.317161196319,
+    "expected_profit": 9442.818839028329,
+    "value_per_outcome": 1.5516999999999999,
+    "cost_per_treatment": 0.01
+  },
+  "assumptions": {
+    "value_per_conversion_usd": 25.0,
+    "conversions_per_visit": 0.062068,
+    "value_per_outcome_usd": 1.5516999999999999,
+    "priced_outcome": "visit",
+    "cost_per_treatment_usd": 0.01,
+    "logging_propensity": 0.85,
+    "note": "propensity is KNOWN by design here; production logging would need it estimated"
+  },
+  "policy_values": [
+    {
+      "policy": "treat_nobody",
+      "treated_fraction": 0.0,
+      "value_ipw": 0.03802,
+      "ipw_ci": [
+        0.03703604603580074,
+        0.039003953964199256
+      ],
+      "value_dr": 0.037957619587804046,
+      "dr_ci": [
+        0.03698602480622983,
+        0.03892921436937826
+      ],
+      "se_dr": 0.0004957116232521503
+    },
+    {
+      "policy": "treat_everybody",
+      "treated_fraction": 1.0,
+      "value_ipw": 0.048375294117647065,
+      "ipw_ci": [
+        0.04791742538026723,
+        0.0488331628550269
+      ],
+      "value_dr": 0.0483818733234709,
+      "dr_ci": [
+        0.047925681982142136,
+        0.04883806466479967
+      ],
+      "se_dr": 0.000232750684351411
+    },
+    {
+      "policy": "model_targeting",
+      "treated_fraction": 0.180905,
+      "value_ipw": 0.04771490196078432,
+      "ipw_ci": [
+        0.04709132415004773,
+        0.048338479771520906
+      ],
+      "value_dr": 0.047149013839955366,
+      "dr_ci": [
+        0.04651389684723935,
+        0.047784130832671384
+      ],
+      "se_dr": 0.0003240392819979704
+    },
+    {
+      "policy": "random_same_budget",
+      "treated_fraction": 0.180874,
+      "value_ipw": 0.040014901960784305,
+      "ipw_ci": [
+        0.03909996997415147,
+        0.04092983394741714
+      ],
+      "value_dr": 0.039903068868819724,
+      "dr_ci": [
+        0.03899916620345037,
+        0.04080697153418908
+      ],
+      "se_dr": 0.0004611748292700784
+    }
+  ],
+  "model_vs_random_same_budget": {
+    "diff_dr": 0.007245944971135641,
+    "se": 0.0005636343490509128,
+    "resolved": true
+  },
+  "profit_curve": [
+    {
+      "treated_fraction": 0.02,
+      "n_treated": 20000,
+      "threshold": 0.09443619290877192,
+      "predicted_incremental_outcomes": 2900.4087199826918,
+      "predicted_profit": 4300.564210797143
+    },
+    {
+      "treated_fraction": 0.04,
+      "n_treated": 40000,
+      "threshold": 0.056286833224374,
+      "predicted_incremental_outcomes": 4358.251959567741,
+      "predicted_profit": 6362.6995656612635
+    },
+    {
+      "treated_fraction": 0.06,
+      "n_treated": 60000,
+      "threshold": 0.037169404635365916,
+      "predicted_incremental_outcomes": 5275.780562420029,
+      "predicted_profit": 7586.428698707158
+    },
+    {
+      "treated_fraction": 0.08,
+      "n_treated": 80000,
+      "threshold": 0.025611878028330592,
+      "predicted_incremental_outcomes": 5894.605007637258,
+      "predicted_profit": 8346.658590350731
+    },
+    {
+      "treated_fraction": 0.1,
+      "n_treated": 100000,
+      "threshold": 0.01865879902619877,
+      "predicted_incremental_outcomes": 6332.065354827734,
+      "predicted_profit": 8825.465811086195
+    },
+    {
+      "treated_fraction": 0.12000000000000001,
+      "n_treated": 120000,
+      "threshold": 0.014116853388273357,
+      "predicted_incremental_outcomes": 6656.830835183262,
+      "predicted_profit": 9129.404406953867
+    },
+    {
+      "treated_fraction": 0.13999999999999999,
+      "n_treated": 140000,
+      "threshold": 0.010843068762721758,
+      "predicted_incremental_outcomes": 6904.836842218206,
+      "predicted_profit": 9314.235328069988
+    },
+    {
+      "treated_fraction": 0.16,
+      "n_treated": 160000,
+      "threshold": 0.008400441512773565,
+      "predicted_incremental_outcomes": 7095.796924477561,
+      "predicted_profit": 9410.548087711832
+    },
+    {
+      "treated_fraction": 0.18,
+      "n_treated": 180000,
+      "threshold": 0.006600221101553144,
+      "predicted_incremental_outcomes": 7245.380359196306,
+      "predicted_profit": 9442.656703364906
+    },
+    {
+      "treated_fraction": 0.19999999999999998,
+      "n_treated": 199999,
+      "threshold": 0.005202585615104133,
+      "predicted_incremental_outcomes": 7362.421312147571,
+      "predicted_profit": 9424.279150059385
+    },
+    {
+      "treated_fraction": 0.22,
+      "n_treated": 220000,
+      "threshold": 0.004223943639740043,
+      "predicted_incremental_outcomes": 7456.005410634039,
+      "predicted_profit": 9369.483595680838
+    },
+    {
+      "treated_fraction": 0.24,
+      "n_treated": 240000,
+      "threshold": 0.003532929030417964,
+      "predicted_incremental_outcomes": 7533.450623049221,
+      "predicted_profit": 9289.655331785474
+    },
+    {
+      "treated_fraction": 0.26,
+      "n_treated": 260000,
+      "threshold": 0.0028970276248918036,
+      "predicted_incremental_outcomes": 7597.857001467998,
+      "predicted_profit": 9189.59470917789
+    },
+    {
+      "treated_fraction": 0.28,
+      "n_treated": 280000,
+      "threshold": 0.0023027228756798447,
+      "predicted_incremental_outcomes": 7649.717192839635,
+      "predicted_profit": 9070.06616812926
+    },
+    {
+      "treated_fraction": 0.30000000000000004,
+      "n_treated": 300000,
+      "threshold": 0.0018613571861807003,
+      "predicted_incremental_outcomes": 7690.865564386644,
+      "predicted_profit": 8933.916096258754
+    },
+    {
+      "treated_fraction": 0.32,
+      "n_treated": 320000,
+      "threshold": 0.0015592812415037346,
+      "predicted_incremental_outcomes": 7724.9921076399405,
+      "predicted_profit": 8786.870253424895
+    },
+    {
+      "treated_fraction": 0.34,
+      "n_treated": 340000,
+      "threshold": 0.0013107158072801545,
+      "predicted_incremental_outcomes": 7753.7535918099,
+      "predicted_profit": 8631.499448411421
+    },
+    {
+      "treated_fraction": 0.36000000000000004,
+      "n_treated": 360000,
+      "threshold": 0.0010917431509067333,
+      "predicted_incremental_outcomes": 7777.669138114322,
+      "predicted_profit": 8468.609201611993
+    },
+    {
+      "treated_fraction": 0.38,
+      "n_treated": 380000,
+      "threshold": 0.0009007893539927465,
+      "predicted_incremental_outcomes": 7797.528742189412,
+      "predicted_profit": 8299.425349255309
+    },
+    {
+      "treated_fraction": 0.4,
+      "n_treated": 400000,
+      "threshold": 0.0007871208734535687,
+      "predicted_incremental_outcomes": 7814.3576861462025,
+      "predicted_profit": 8125.538821593062
+    },
+    {
+      "treated_fraction": 0.42000000000000004,
+      "n_treated": 420000,
+      "threshold": 0.0006863588612318052,
+      "predicted_incremental_outcomes": 7829.067814846242,
+      "predicted_profit": 7948.364528296912
+    },
+    {
+      "treated_fraction": 0.44,
+      "n_treated": 440000,
+      "threshold": 0.0006121124297882828,
+      "predicted_incremental_outcomes": 7842.091746082462,
+      "predicted_profit": 7768.573762396156
+    },
+    {
+      "treated_fraction": 0.46,
+      "n_treated": 460000,
+      "threshold": 0.0005539787906422165,
+      "predicted_incremental_outcomes": 7853.759414555059,
+      "predicted_profit": 7586.678483565085
+    },
+    {
+      "treated_fraction": 0.48000000000000004,
+      "n_treated": 480000,
+      "threshold": 0.0004983649776188065,
+      "predicted_incremental_outcomes": 7864.2661005179425,
+      "predicted_profit": 7402.981708173691
+    },
+    {
+      "treated_fraction": 0.5,
+      "n_treated": 500000,
+      "threshold": 0.00045341363440934033,
+      "predicted_incremental_outcomes": 7873.798957547976,
+      "predicted_profit": 7217.773842427194
+    },
+    {
+      "treated_fraction": 0.52,
+      "n_treated": 520000,
+      "threshold": 0.00040791532179142945,
+      "predicted_incremental_outcomes": 7882.373274918278,
+      "predicted_profit": 7031.078610690691
+    },
+    {
+      "treated_fraction": 0.54,
+      "n_treated": 540000,
+      "threshold": 0.0003811046385734654,
+      "predicted_incremental_outcomes": 7890.235248692967,
+      "predicted_profit": 6843.278035396876
+    },
+    {
+      "treated_fraction": 0.56,
+      "n_treated": 560000,
+      "threshold": 0.00035878322171453865,
+      "predicted_incremental_outcomes": 7897.632323107545,
+      "predicted_profit": 6654.756075765976
+    },
+    {
+      "treated_fraction": 0.5800000000000001,
+      "n_treated": 580000,
+      "threshold": 0.0003317700793717088,
+      "predicted_incremental_outcomes": 7904.542377894666,
+      "predicted_profit": 6465.478407779152
+    },
+    {
+      "treated_fraction": 0.6,
+      "n_treated": 600000,
+      "threshold": 0.0003023338826588048,
+      "predicted_incremental_outcomes": 7910.899475346737,
+      "predicted_profit": 6275.342715895531
+    },
+    {
+      "treated_fraction": 0.62,
+      "n_treated": 620000,
+      "threshold": 0.0002814945785338007,
+      "predicted_incremental_outcomes": 7916.740118022489,
+      "predicted_profit": 6084.405641135494
+    },
+    {
+      "treated_fraction": 0.64,
+      "n_treated": 640000,
+      "threshold": 0.00025273062303270014,
+      "predicted_incremental_outcomes": 7922.031641350398,
+      "predicted_profit": 5892.616497883411
+    },
+    {
+      "treated_fraction": 0.66,
+      "n_treated": 660000,
+      "threshold": 0.00023420825742265347,
+      "predicted_incremental_outcomes": 7926.9064752726645,
+      "predicted_profit": 5700.180777680593
+    },
+    {
+      "treated_fraction": 0.68,
+      "n_treated": 680000,
+      "threshold": 0.00022155768294931358,
+      "predicted_incremental_outcomes": 7931.43892545577,
+      "predicted_profit": 5507.213780629718
+    },
+    {
+      "treated_fraction": 0.7000000000000001,
+      "n_treated": 700000,
+      "threshold": 0.00020932722847157828,
+      "predicted_incremental_outcomes": 7935.739000830627,
+      "predicted_profit": 5313.886207588883
+    },
+    {
+      "treated_fraction": 0.7200000000000001,
+      "n_treated": 720000,
+      "threshold": 0.0001995717107502049,
+      "predicted_incremental_outcomes": 7939.834128052414,
+      "predicted_profit": 5120.24061649893
+    },
+    {
+      "treated_fraction": 0.74,
+      "n_treated": 740000,
+      "threshold": 0.00018755162218725213,
+      "predicted_incremental_outcomes": 7943.7011840318355,
+      "predicted_profit": 4926.241127262198
+    },
+    {
+      "treated_fraction": 0.76,
+      "n_treated": 760000,
+      "threshold": 0.00017397064767604286,
+      "predicted_incremental_outcomes": 7947.321553821712,
+      "predicted_profit": 4731.858855065149
+    },
+    {
+      "treated_fraction": 0.78,
+      "n_treated": 780000,
+      "threshold": 0.00016347102188703455,
+      "predicted_incremental_outcomes": 7950.684356085079,
+      "predicted_profit": 4537.076915337217
+    },
+    {
+      "treated_fraction": 0.8,
+      "n_treated": 800000,
+      "threshold": 0.00015543255868127024,
+      "predicted_incremental_outcomes": 7953.868658001518,
+      "predicted_profit": 4342.017996620954
+    },
+    {
+      "treated_fraction": 0.8200000000000001,
+      "n_treated": 820000,
+      "threshold": 0.00014428999446062255,
+      "predicted_incremental_outcomes": 7956.877729285876,
+      "predicted_profit": 4146.687172532893
+    },
+    {
+      "treated_fraction": 0.8400000000000001,
+      "n_treated": 840000,
+      "threshold": 0.00013070890229139676,
+      "predicted_incremental_outcomes": 7959.627576164158,
+      "predicted_profit": 3950.954109933924
+    },
+    {
+      "treated_fraction": 0.86,
+      "n_treated": 860000,
+      "threshold": 0.00012382508031563434,
+      "predicted_incremental_outcomes": 7962.164372243989,
+      "predicted_profit": 3754.890456410998
+    },
+    {
+      "treated_fraction": 0.88,
+      "n_treated": 880000,
+      "threshold": 0.00011775270545190365,
+      "predicted_incremental_outcomes": 7964.575734408034,
+      "predicted_profit": 3558.632167080945
+    },
+    {
+      "treated_fraction": 0.9,
+      "n_treated": 900000,
+      "threshold": 0.00011333923580761308,
+      "predicted_incremental_outcomes": 7966.869555166675,
+      "predicted_profit": 3362.191488752129
+    },
+    {
+      "treated_fraction": 0.92,
+      "n_treated": 920000,
+      "threshold": 9.897787955156481e-05,
+      "predicted_incremental_outcomes": 7968.99955074796,
+      "predicted_profit": 3165.496602895608
+    },
+    {
+      "treated_fraction": 0.9400000000000001,
+      "n_treated": 940000,
+      "threshold": 7.199365350908681e-05,
+      "predicted_incremental_outcomes": 7970.690454681828,
+      "predicted_profit": 2968.120378529791
+    },
+    {
+      "treated_fraction": 0.9600000000000001,
+      "n_treated": 960000,
+      "threshold": -1.6074719995468555e-05,
+      "predicted_incremental_outcomes": 7971.561316750243,
+      "predicted_profit": 2769.4716952013514
+    },
+    {
+      "treated_fraction": 0.98,
+      "n_treated": 980000,
+      "threshold": -0.0004290682674445971,
+      "predicted_incremental_outcomes": 7967.904063427603,
+      "predicted_profit": 2563.7967352206106
+    },
+    {
+      "treated_fraction": 1.0,
+      "n_treated": 1000000,
+      "threshold": -0.06473291826459238,
+      "predicted_incremental_outcomes": 7895.971353245058,
+      "predicted_profit": 2252.1787488303544
+    }
+  ]
+}
