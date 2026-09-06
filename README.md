@@ -73,6 +73,32 @@ targeted users were ever shown an ad — 11.9M "targeted", ~428,000 reached. The
 entire measured lift comes from that 3.6%. Delivery, not targeting, is where the
 leverage is.
 
+## Model results (`visit`, held-out test, n = 2,796,413)
+
+| Model | Qini | 95% CI | vs T-learner |
+|---|---|---|---|
+| S-learner | **0.0893** | [+0.0777, +0.1010] | +0.0184, resolved |
+| Causal forest | 0.0877 | [+0.0782, +0.0991] | +0.0171, resolved |
+| Class transformation | 0.0828 | [+0.0714, +0.0929] | +0.0118, resolved |
+| DR-learner | 0.0749 | [+0.0630, +0.0876] | +0.0038, **overlapping** |
+| T-learner | 0.0712 | [+0.0605, +0.0814] | (reference) |
+
+> The DR-learner is **not distinguishable** from the T-learner even at 2.8M
+> held-out rows. Publishing this leaderboard without intervals would have
+> declared a winner over a gap the data cannot resolve.
+
+Two findings fell out of running this at full scale:
+
+- **The X-learner scored Qini −0.0016 — actively anti-ranked** (decile rank
+  correlation −0.44). The cause is EconML's default of reusing the propensity as
+  the blending weight: on an 85/15 design that puts 85% of the weight on the
+  effect model imputed from the 15% arm. Setting `blend=0.5` roughly doubles its
+  Qini. The bug looked like mild underperformance at 400k rows and became total
+  failure at 1.5M — an argument for evaluating at the scale you ship.
+- **The S-learner leads despite its degeneracy diagnostic firing**
+  (`treatment_gain_share = 0.0023`). The diagnostic flags a real pathology in how
+  the model represents the effect; it does not by itself predict poor ranking.
+
 ## What this demonstrates
 
 - **Experiment analysis** — SRM with a *validated* calibration simulation,

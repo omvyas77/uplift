@@ -276,3 +276,82 @@ population and leans on an exclusion restriction that is shaky here — being
 *reachable* correlates with actively browsing, which correlates with visiting.
 It is not a stakeholder number and will be misquoted within a day if presented
 as one.
+
+
+---
+
+## 10. The X-learner's blending weight is backwards on an 85/15 design
+
+The first full evaluation produced a result that could not be a real effect:
+
+```
+x_learner   Qini = -0.0016   calibration slope 0.003   decile rank correlation -0.44
+```
+
+Not merely weak — **anti-ranked**. Its lowest-predicted decile carried the second
+*highest* observed uplift (predicted −0.119, observed +0.0275).
+
+The cause is the blending weight, not the model. The X-learner forms
+
+```
+tau(x) = g(x) * tau_0(x) + (1 - g(x)) * tau_1(x)
+```
+
+where `tau_0` is imputed through the CONTROL outcome model and `tau_1` through
+the treated one. Künzel et al. suggest reusing the propensity score as `g`, and
+EconML's default follows that. On an 85/15 design this sets g ≈ 0.85, putting
+**85% of the weight on `tau_0` — the arm holding 15% of the data**, and therefore
+the noisier of the two. The paper's own reasoning is that `g` should be *small*
+when `tau_0` is noisy, so reusing the propensity gets the sign of the argument
+backwards here.
+
+Measured on a 400k train / 600k validation slice:
+
+| blending weight `g` | Qini |
+|---|---|
+| `LogisticRegression` propensity (≈0.85) — EconML default | +0.0429 |
+| g = 0.85 | +0.0459 |
+| g = 0.15 (= 1 − treated share) | +0.0807 |
+| **g = 0.50** | **+0.0854** |
+
+Flipping the weight roughly doubles the Qini. `fit_x_learner` now defaults to
+`blend=0.5`, with `blend=None` restoring the textbook propensity-weighted
+behaviour so the comparison stays reproducible.
+
+Worth noting the subsample was *kinder* than the full run: the same
+propensity-weighted configuration scored +0.0429 on 400k rows but −0.0016 when
+fitted on 1.5M. A bug that looks like mild underperformance at development scale
+became a total ranking failure at full scale, which is an argument for evaluating
+at the scale you intend to ship.
+
+## 11. Model results (`visit`, held-out test split, n = 2,796,413)
+
+Point estimates on the full test split; bootstrap replicates draw 1M rows, so the
+intervals are conservative (wider) by roughly sqrt(n/b). Reference for the paired
+comparisons is the T-learner.
+
+| Model | Qini | 95% CI | vs T-learner | Calib. slope | Response AUC* |
+|---|---|---|---|---|---|
+| S-learner | **0.0893** | [+0.0777, +0.1010] | +0.0184, **resolved** | 0.954 | 0.867 |
+| Causal forest | 0.0877 | [+0.0782, +0.0991] | +0.0171, **resolved** | 1.086 | 0.887 |
+| Class transformation | 0.0828 | [+0.0714, +0.0929] | +0.0118, **resolved** | 0.496 | 0.726 |
+| DR-learner | 0.0749 | [+0.0630, +0.0876] | +0.0038, *overlapping* | 0.747 | 0.749 |
+| T-learner | 0.0712 | [+0.0605, +0.0814] | (reference) | 0.541 | 0.690 |
+| X-learner (propensity-weighted) | −0.0016 | [−0.0127, +0.0085] | −0.0724, **resolved** | 0.003 | 0.418 |
+
+\* Response AUC measures who RESPONDS, not who responds BECAUSE OF treatment. It
+is reported only so it can be labelled as not the objective.
+
+Two things worth stating plainly:
+
+- **The DR-learner is not distinguishable from the T-learner** (+0.0038, CI
+  [−0.0020, +0.0108]) even at 2.8M held-out rows. Reporting this leaderboard
+  without intervals would have declared a winner over a gap the data cannot
+  resolve.
+- **The S-learner leads despite its degeneracy diagnostic firing.**
+  `treatment_gain_share = 0.0023` — only 0.23% of total split gain came from the
+  treatment column, the classic sign that the trees are barely modelling the
+  treatment at all. It still ranks best, and its calibration slope of 0.954 is
+  the second best of the six. The diagnostic flags a real pathology in how the
+  model represents the effect; it does not by itself predict poor ranking, and
+  conflating the two would be a mistake.
