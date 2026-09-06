@@ -1,0 +1,776 @@
+{
+  "run_id": "2026-09-06T05:40:02.093132+00:00",
+  "git_sha": "7e2d7a7",
+  "dataset": {
+    "name": "criteo-uplift-v2.1",
+    "rows": 13979592,
+    "sha256": "2716e1bf0fd157a93b5bf86924d9088419dfbac2022c6cd90030220634f616dc",
+    "split": "test",
+    "n_eval": 2796413
+  },
+  "outcome": "visit",
+  "n_boot": 200,
+  "boot_sample": 1000000,
+  "boot_note": "point estimates use the full split; bootstrap replicates draw 1000000 rows, so intervals are conservative (wider) by ~sqrt(n/b)",
+  "reference_model": "t_learner",
+  "ranking": [
+    "s_learner",
+    "causal_forest",
+    "class_transformation",
+    "dr_learner",
+    "t_learner",
+    "x_learner"
+  ],
+  "n_models_resolved_vs_reference": 4,
+  "models": {
+    "class_transformation": {
+      "qini": 0.08283326395331157,
+      "qini_boot_mean": 0.08263347825365179,
+      "qini_ci": [
+        0.07144555139937195,
+        0.09289011109019421
+      ],
+      "auuc": 0.032372621583704145,
+      "uplift_at_30pct": 0.030215096059262564,
+      "response_auc_not_the_objective": 0.7256408558316492,
+      "score_mean": 0.011082830885025258,
+      "score_sd": 0.05982455455464066,
+      "calibration_slope": 0.4960308859152675,
+      "calibration_intercept": 0.0015189869894526014,
+      "calibration_slope_se": 0.015667096932902892,
+      "calibration_r2": 0.9940499708986087,
+      "rank_correlation": 0.7380952380952381,
+      "n_deciles": 8,
+      "observed_spread": 0.05982141528671013,
+      "calibration_table": [
+        {
+          "decile": 1,
+          "n_treatment": 829200,
+          "n_control": 147410,
+          "predicted_uplift": -0.005876355854758183,
+          "observed_uplift": 0.0015850909773721805,
+          "se": 0.0004650384666953328,
+          "ci_low": 0.0006736155826493282,
+          "ci_high": 0.0024965663720950327
+        },
+        {
+          "decile": 2,
+          "n_treatment": 125338,
+          "n_control": 22523,
+          "predicted_uplift": 0.0003660108524862457,
+          "observed_uplift": 0.00026998629148154447,
+          "se": 0.0003119643330009549,
+          "ci_low": -0.0003414638012003272,
+          "ci_high": 0.0008814363841634161
+        },
+        {
+          "decile": 3,
+          "n_treatment": 250663,
+          "n_control": 45436,
+          "predicted_uplift": 0.0005257493002937113,
+          "observed_uplift": 0.0006722497669080616,
+          "se": 0.00029508259920457133,
+          "ci_low": 9.388787246710178e-05,
+          "ci_high": 0.0012506116613490213
+        },
+        {
+          "decile": 4,
+          "n_treatment": 264451,
+          "n_control": 47812,
+          "predicted_uplift": 0.0010267974859451225,
+          "observed_uplift": 0.0012231540761090311,
+          "se": 0.000493868980883181,
+          "ci_low": 0.0002551708735779965,
+          "ci_high": 0.002191137278640066
+        },
+        {
+          "decile": 5,
+          "n_treatment": 211606,
+          "n_control": 38278,
+          "predicted_uplift": 0.0014877753036405068,
+          "observed_uplift": 0.0011196840678841698,
+          "se": 0.0006347212676165371,
+          "ci_low": -0.00012436961664424287,
+          "ci_high": 0.002363737752412582
+        },
+        {
+          "decile": 6,
+          "n_treatment": 216878,
+          "n_control": 38873,
+          "predicted_uplift": 0.002454789787394668,
+          "observed_uplift": 0.0023161716688002813,
+          "se": 0.0007663201490444352,
+          "ci_low": 0.0008141841766731884,
+          "ci_high": 0.0038181591609273745
+        },
+        {
+          "decile": 7,
+          "n_treatment": 236716,
+          "n_control": 41588,
+          "predicted_uplift": 0.007961612493918727,
+          "observed_uplift": 0.007325605392772869,
+          "se": 0.001167695592989008,
+          "ci_low": 0.005036922030514413,
+          "ci_high": 0.009614288755031324
+        },
+        {
+          "decile": 8,
+          "n_treatment": 242242,
+          "n_control": 37399,
+          "predicted_uplift": 0.11795595791934038,
+          "observed_uplift": 0.06009140157819168,
+          "se": 0.002292807537519166,
+          "ci_low": 0.055597498804654116,
+          "ci_high": 0.06458530435172924
+        }
+      ],
+      "vs_reference": {
+        "reference": "t_learner",
+        "diff": 0.011748735106500123,
+        "ci": [
+          0.006203120609854474,
+          0.018322043107290163
+        ],
+        "resolved": true
+      }
+    },
+    "s_learner": {
+      "qini": 0.08932403060570301,
+      "qini_boot_mean": 0.08950982832603771,
+      "qini_ci": [
+        0.07766199822362159,
+        0.10104162013382419
+      ],
+      "auuc": 0.03489015895704149,
+      "uplift_at_30pct": 0.029354408399193857,
+      "response_auc_not_the_objective": 0.8670726816937193,
+      "score_mean": 0.007902625743729973,
+      "score_sd": 0.024253179729010085,
+      "calibration_slope": 0.953535313656392,
+      "calibration_intercept": -0.00018974092276446714,
+      "calibration_slope_se": 0.01976670381777655,
+      "calibration_r2": 0.9965739439651348,
+      "rank_correlation": 0.9030303030303028,
+      "n_deciles": 10,
+      "observed_spread": 0.06066918813856337,
+      "calibration_table": [
+        {
+          "decile": 1,
+          "n_treatment": 242502,
+          "n_control": 43745,
+          "predicted_uplift": -0.0006809360766883924,
+          "observed_uplift": 0.0003315007662258139,
+          "se": 0.0008322286596371696,
+          "ci_low": -0.0012996674066630385,
+          "ci_high": 0.001962668939114666
+        },
+        {
+          "decile": 2,
+          "n_treatment": 231892,
+          "n_control": 41192,
+          "predicted_uplift": 0.00013044405854120778,
+          "observed_uplift": 3.595022772586961e-05,
+          "se": 0.00015848943846420396,
+          "ci_low": -0.00027468907166397017,
+          "ci_high": 0.0003465895271157094
+        },
+        {
+          "decile": 3,
+          "n_treatment": 237364,
+          "n_control": 42557,
+          "predicted_uplift": 0.00018132600254766837,
+          "observed_uplift": 0.00025234579652439154,
+          "se": 0.00016456841686479087,
+          "ci_low": -7.020830053059855e-05,
+          "ci_high": 0.0005748998935793816
+        },
+        {
+          "decile": 4,
+          "n_treatment": 237518,
+          "n_control": 42348,
+          "predicted_uplift": 0.00024852607615372785,
+          "observed_uplift": 0.0002520574752214195,
+          "se": 0.00020268216523951354,
+          "ci_low": -0.00014519956864802704,
+          "ci_high": 0.000649314519090866
+        },
+        {
+          "decile": 5,
+          "n_treatment": 236686,
+          "n_control": 42469,
+          "predicted_uplift": 0.00037145208529643136,
+          "observed_uplift": 0.0009573320223914042,
+          "se": 0.00022876626460376586,
+          "ci_low": 0.0005089501437680232,
+          "ci_high": 0.0014057139010147852
+        },
+        {
+          "decile": 6,
+          "n_treatment": 236924,
+          "n_control": 42659,
+          "predicted_uplift": 0.000594851240779311,
+          "observed_uplift": 0.0003980690135064408,
+          "se": 0.00035168488398076126,
+          "ci_low": -0.00029123335909585126,
+          "ci_high": 0.0010873713861087328
+        },
+        {
+          "decile": 7,
+          "n_treatment": 236894,
+          "n_control": 42842,
+          "predicted_uplift": 0.0012372170195786936,
+          "observed_uplift": 0.0011001371539512833,
+          "se": 0.0005417906329197952,
+          "ci_low": 3.8227513428484676e-05,
+          "ci_high": 0.002162046794474082
+        },
+        {
+          "decile": 8,
+          "n_treatment": 236973,
+          "n_control": 42565,
+          "predicted_uplift": 0.003299683962150544,
+          "observed_uplift": 0.002715472813305444,
+          "se": 0.0008889946005629581,
+          "ci_low": 0.000973043396202046,
+          "ci_high": 0.004457902230408842
+        },
+        {
+          "decile": 9,
+          "n_treatment": 238030,
+          "n_control": 41611,
+          "predicted_uplift": 0.010317663987822707,
+          "observed_uplift": 0.0067281616340931355,
+          "se": 0.0015374036986976203,
+          "ci_low": 0.0037148503846457996,
+          "ci_high": 0.009741472883540471
+        },
+        {
+          "decile": 10,
+          "n_treatment": 242311,
+          "n_control": 37331,
+          "predicted_uplift": 0.06334621430555272,
+          "observed_uplift": 0.06070513836628924,
+          "se": 0.00239205977683038,
+          "ci_low": 0.056016701203701696,
+          "ci_high": 0.06539357552887679
+        }
+      ],
+      "vs_reference": {
+        "reference": "t_learner",
+        "diff": 0.018379016314736443,
+        "ci": [
+          0.011198621386149198,
+          0.024351575624989998
+        ],
+        "resolved": true
+      }
+    },
+    "t_learner": {
+      "qini": 0.07117683727368909,
+      "qini_boot_mean": 0.0703997510660618,
+      "qini_ci": [
+        0.06051110237852187,
+        0.08142616722163175
+      ],
+      "auuc": 0.027825995153701457,
+      "uplift_at_30pct": 0.027835265079356145,
+      "response_auc_not_the_objective": 0.6895172105997063,
+      "score_mean": 0.0082162058047982,
+      "score_sd": 0.03560597035978765,
+      "calibration_slope": 0.5411816772344006,
+      "calibration_intercept": 0.003723813583170102,
+      "calibration_slope_se": 0.08957215780880208,
+      "calibration_r2": 0.8202407548881749,
+      "rank_correlation": 0.309090909090909,
+      "n_deciles": 10,
+      "observed_spread": 0.054800815190896156,
+      "calibration_table": [
+        {
+          "decile": 1,
+          "n_treatment": 237839,
+          "n_control": 42295,
+          "predicted_uplift": -0.021166047379346634,
+          "observed_uplift": 0.01101866089782455,
+          "se": 0.0016550642078290378,
+          "ci_low": 0.007774735050479637,
+          "ci_high": 0.014262586745169465
+        },
+        {
+          "decile": 2,
+          "n_treatment": 236829,
+          "n_control": 42502,
+          "predicted_uplift": -0.0005075888052725529,
+          "observed_uplift": 0.0010499101438204332,
+          "se": 0.0004275141973954161,
+          "ci_low": 0.00021198231692541776,
+          "ci_high": 0.0018878379707154488
+        },
+        {
+          "decile": 3,
+          "n_treatment": 238430,
+          "n_control": 42637,
+          "predicted_uplift": 0.00019058269287925404,
+          "observed_uplift": 0.0002587687929782381,
+          "se": 0.00020463276251613685,
+          "ci_low": -0.00014231142155339007,
+          "ci_high": 0.0006598490075098663
+        },
+        {
+          "decile": 4,
+          "n_treatment": 236684,
+          "n_control": 41862,
+          "predicted_uplift": 0.00033129827647001073,
+          "observed_uplift": 0.00036968063645466333,
+          "se": 0.00016651011751825812,
+          "ci_low": 4.332080611887739e-05,
+          "ci_high": 0.0006960404667904493
+        },
+        {
+          "decile": 5,
+          "n_treatment": 237084,
+          "n_control": 42515,
+          "predicted_uplift": 0.00045961945714134066,
+          "observed_uplift": 0.0004793023942933376,
+          "se": 0.0001752007644264894,
+          "ci_low": 0.00013590889601741837,
+          "ci_high": 0.0008226958925692568
+        },
+        {
+          "decile": 6,
+          "n_treatment": 236789,
+          "n_control": 42414,
+          "predicted_uplift": 0.0007342345949771019,
+          "observed_uplift": -0.00018871125904620228,
+          "se": 0.0002821273069609667,
+          "ci_low": -0.000741680780689697,
+          "ci_high": 0.00036425826259729244
+        },
+        {
+          "decile": 7,
+          "n_treatment": 237247,
+          "n_control": 42640,
+          "predicted_uplift": 0.0014488504309534873,
+          "observed_uplift": 0.001034565400293585,
+          "se": 0.00040769117954626117,
+          "ci_low": 0.00023549068838291316,
+          "ci_high": 0.0018336401122042568
+        },
+        {
+          "decile": 8,
+          "n_treatment": 236897,
+          "n_control": 42499,
+          "predicted_uplift": 0.003524684278304211,
+          "observed_uplift": 0.0023075067512763024,
+          "se": 0.0006280465478803219,
+          "ci_low": 0.0010765355174308716,
+          "ci_high": 0.0035384779851217333
+        },
+        {
+          "decile": 9,
+          "n_treatment": 237598,
+          "n_control": 42010,
+          "predicted_uplift": 0.012127406708465195,
+          "observed_uplift": 0.010783313177595719,
+          "se": 0.0011268429993630165,
+          "ci_low": 0.008574700898844207,
+          "ci_high": 0.01299192545634723
+        },
+        {
+          "decile": 10,
+          "n_treatment": 241697,
+          "n_control": 37945,
+          "predicted_uplift": 0.08506034339097475,
+          "observed_uplift": 0.054612103931849953,
+          "se": 0.0022769283625933942,
+          "ci_low": 0.0501493243411669,
+          "ci_high": 0.059074883522533005
+        }
+      ],
+      "vs_reference": "(reference)"
+    },
+    "x_learner": {
+      "qini": -0.0015992059493658325,
+      "qini_boot_mean": -0.0016274346204964419,
+      "qini_ci": [
+        -0.012724872928655253,
+        0.008545476800694597
+      ],
+      "auuc": -0.000706632491066919,
+      "uplift_at_30pct": 0.015443388335650336,
+      "response_auc_not_the_objective": 0.41752619892597576,
+      "score_mean": -0.008003622528474124,
+      "score_sd": 0.06720416292357118,
+      "calibration_slope": 0.003436298821823613,
+      "calibration_intercept": 0.009039312299081349,
+      "calibration_slope_se": 0.10589134738539469,
+      "calibration_r2": 0.0001316175329528101,
+      "rank_correlation": -0.4424242424242424,
+      "n_deciles": 10,
+      "observed_spread": 0.03967002007808223,
+      "calibration_table": [
+        {
+          "decile": 1,
+          "n_treatment": 238792,
+          "n_control": 40850,
+          "predicted_uplift": -0.11932918247172848,
+          "observed_uplift": 0.027544037547126754,
+          "se": 0.002117854064470518,
+          "ci_low": 0.02339304358076454,
+          "ci_high": 0.03169503151348897
+        },
+        {
+          "decile": 2,
+          "n_treatment": 238615,
+          "n_control": 41026,
+          "predicted_uplift": -0.020620238330443106,
+          "observed_uplift": 0.015114098615162039,
+          "se": 0.001032752719376523,
+          "ci_low": 0.013089903285184053,
+          "ci_high": 0.017138293945140024
+        },
+        {
+          "decile": 3,
+          "n_treatment": 236645,
+          "n_control": 42996,
+          "predicted_uplift": -0.0072186033675178144,
+          "observed_uplift": 0.0037502107586822927,
+          "se": 0.0005879221871507146,
+          "ci_low": 0.0025978832718668923,
+          "ci_high": 0.004902538245497693
+        },
+        {
+          "decile": 4,
+          "n_treatment": 236984,
+          "n_control": 42658,
+          "predicted_uplift": -0.0036739114189002307,
+          "observed_uplift": 0.0016087741747997453,
+          "se": 0.0004288010269625959,
+          "ci_low": 0.0007683241619530573,
+          "ci_high": 0.0024492241876464334
+        },
+        {
+          "decile": 5,
+          "n_treatment": 236947,
+          "n_control": 42695,
+          "predicted_uplift": -0.0018600807569428468,
+          "observed_uplift": 0.0011459778399495846,
+          "se": 0.0003187054777092502,
+          "ci_low": 0.0005213151036394542,
+          "ci_high": 0.0017706405762597148
+        },
+        {
+          "decile": 6,
+          "n_treatment": 237390,
+          "n_control": 42289,
+          "predicted_uplift": -0.0006914284425205416,
+          "observed_uplift": 0.0005953248836729345,
+          "se": 0.00018815228661497963,
+          "ci_low": 0.00022654640190757438,
+          "ci_high": 0.0009641033654382945
+        },
+        {
+          "decile": 7,
+          "n_treatment": 237179,
+          "n_control": 42440,
+          "predicted_uplift": -0.000592808186421496,
+          "observed_uplift": 0.00035216316318182304,
+          "se": 9.317614036003661e-05,
+          "ci_low": 0.0001695379280761513,
+          "ci_high": 0.0005347883982874948
+        },
+        {
+          "decile": 8,
+          "n_treatment": 237263,
+          "n_control": 42361,
+          "predicted_uplift": -0.0005781661391946133,
+          "observed_uplift": 3.6957831397042905e-05,
+          "se": 0.0001454533000725601,
+          "ci_low": -0.00024813063674517487,
+          "ci_high": 0.0003220462995392607
+        },
+        {
+          "decile": 9,
+          "n_treatment": 237560,
+          "n_control": 42092,
+          "predicted_uplift": -0.0005416363154614871,
+          "observed_uplift": 0.00026358246019747447,
+          "se": 0.00013797155719349745,
+          "ci_low": -6.84179190178053e-06,
+          "ci_high": 0.0005340067122967295
+        },
+        {
+          "decile": 10,
+          "n_treatment": 239719,
+          "n_control": 39912,
+          "predicted_uplift": 0.075072908888464,
+          "observed_uplift": 0.039706977909479274,
+          "se": 0.0019035522901437692,
+          "ci_low": 0.03597601542079749,
+          "ci_high": 0.04343794039816106
+        }
+      ],
+      "vs_reference": {
+        "reference": "t_learner",
+        "diff": -0.07236578312082285,
+        "ci": [
+          -0.08242368623713879,
+          -0.06099378812442754
+        ],
+        "resolved": true
+      }
+    },
+    "dr_learner": {
+      "qini": 0.07492191679385776,
+      "qini_boot_mean": 0.07477538425161262,
+      "qini_ci": [
+        0.06297400375938013,
+        0.08760277156295225
+      ],
+      "auuc": 0.02927990113188606,
+      "uplift_at_30pct": 0.027405473272882563,
+      "response_auc_not_the_objective": 0.7487502170512012,
+      "score_mean": 0.00812310084782511,
+      "score_sd": 0.03263006055762843,
+      "calibration_slope": 0.7465457881748482,
+      "calibration_intercept": 0.000900952780279087,
+      "calibration_slope_se": 0.02592721931708681,
+      "calibration_r2": 0.9916276829571588,
+      "rank_correlation": 0.6333333333333333,
+      "n_deciles": 9,
+      "observed_spread": 0.05633995914475304,
+      "calibration_table": [
+        {
+          "decile": 1,
+          "n_treatment": 702145,
+          "n_control": 125137,
+          "predicted_uplift": -0.0028420326206612437,
+          "observed_uplift": 0.0029801021664131212,
+          "se": 0.0005098768451024875,
+          "ci_low": 0.001980743550012246,
+          "ci_high": 0.0039794607828139966
+        },
+        {
+          "decile": 2,
+          "n_treatment": 163071,
+          "n_control": 28894,
+          "predicted_uplift": 0.0004742200148583094,
+          "observed_uplift": 0.0005150349466906481,
+          "se": 0.00015127857562272852,
+          "ci_low": 0.00021852893847010025,
+          "ci_high": 0.000811540954911196
+        },
+        {
+          "decile": 3,
+          "n_treatment": 152631,
+          "n_control": 27199,
+          "predicted_uplift": 0.0005675809380368463,
+          "observed_uplift": -3.549034660657287e-05,
+          "se": 0.000289854668323514,
+          "ci_low": -0.0006036054965206603,
+          "ci_high": 0.0005326248033075146
+        },
+        {
+          "decile": 4,
+          "n_treatment": 229132,
+          "n_control": 41251,
+          "predicted_uplift": 0.0006416685530558657,
+          "observed_uplift": 0.000916447157110973,
+          "se": 0.0002717469285654244,
+          "ci_low": 0.0003838231771227412,
+          "ci_high": 0.001449071137099205
+        },
+        {
+          "decile": 5,
+          "n_treatment": 186891,
+          "n_control": 33873,
+          "predicted_uplift": 0.0008024770111994263,
+          "observed_uplift": 0.0011070743000437507,
+          "se": 0.0004337628242581623,
+          "ci_low": 0.00025689916449775265,
+          "ci_high": 0.0019572494355897486
+        },
+        {
+          "decile": 6,
+          "n_treatment": 226271,
+          "n_control": 40995,
+          "predicted_uplift": 0.0013781037137300903,
+          "observed_uplift": 0.0021219853593156517,
+          "se": 0.0005044560034694149,
+          "ci_low": 0.0011332515925155985,
+          "ci_high": 0.003110719126115705
+        },
+        {
+          "decile": 7,
+          "n_treatment": 237287,
+          "n_control": 42360,
+          "predicted_uplift": 0.003179281954052948,
+          "observed_uplift": 0.002403509974790455,
+          "se": 0.0007595518060002834,
+          "ci_low": 0.0009147884350298994,
+          "ci_high": 0.00389223151455101
+        },
+        {
+          "decile": 8,
+          "n_treatment": 237481,
+          "n_control": 42157,
+          "predicted_uplift": 0.009433632537660804,
+          "observed_uplift": 0.007043640909894663,
+          "se": 0.001333247848611383,
+          "ci_low": 0.0044304751266163525,
+          "ci_high": 0.009656806693172974
+        },
+        {
+          "decile": 9,
+          "n_treatment": 242185,
+          "n_control": 37453,
+          "predicted_uplift": 0.0737651969682555,
+          "observed_uplift": 0.05630446879814646,
+          "se": 0.002302102065316876,
+          "ci_low": 0.05179234875012539,
+          "ci_high": 0.06081658884616754
+        }
+      ],
+      "vs_reference": {
+        "reference": "t_learner",
+        "diff": 0.00381410758050478,
+        "ci": [
+          -0.002011611249727605,
+          0.010770147759263889
+        ],
+        "resolved": false
+      }
+    },
+    "causal_forest": {
+      "qini": 0.08771917593088437,
+      "qini_boot_mean": 0.08797899224992807,
+      "qini_ci": [
+        0.07822075250769285,
+        0.09913409909712788
+      ],
+      "auuc": 0.034294651194500446,
+      "uplift_at_30pct": 0.02965525176927561,
+      "response_auc_not_the_objective": 0.8870392908135194,
+      "score_mean": 0.007750861413880841,
+      "score_sd": 0.01676037932210074,
+      "calibration_slope": 1.0864861514493065,
+      "calibration_intercept": -0.001150136534070552,
+      "calibration_slope_se": 0.07986803007775012,
+      "calibration_r2": 0.9585611800702818,
+      "rank_correlation": 0.8424242424242423,
+      "n_deciles": 10,
+      "observed_spread": 0.05825083944072852,
+      "calibration_table": [
+        {
+          "decile": 1,
+          "n_treatment": 236807,
+          "n_control": 42835,
+          "predicted_uplift": -0.003635157562180308,
+          "observed_uplift": 0.0001626912999192348,
+          "se": 0.000700307902456594,
+          "ci_low": -0.0012099121888956893,
+          "ci_high": 0.001535294788734159
+        },
+        {
+          "decile": 2,
+          "n_treatment": 237300,
+          "n_control": 42440,
+          "predicted_uplift": -0.00032955668581757065,
+          "observed_uplift": 0.0003585856118531088,
+          "se": 0.00033899215066631415,
+          "ci_low": -0.0003058390034528669,
+          "ci_high": 0.0010230102271590845
+        },
+        {
+          "decile": 3,
+          "n_treatment": 237603,
+          "n_control": 41953,
+          "predicted_uplift": 0.0002593513815444486,
+          "observed_uplift": 0.0007679894814964742,
+          "se": 0.00018422773649434028,
+          "ci_low": 0.0004069031179675672,
+          "ci_high": 0.001129075845025381
+        },
+        {
+          "decile": 4,
+          "n_treatment": 236969,
+          "n_control": 42661,
+          "predicted_uplift": 0.0006076402695453448,
+          "observed_uplift": 0.00024877641527847505,
+          "se": 0.0002212326034767268,
+          "ci_low": -0.00018483948753590944,
+          "ci_high": 0.0006823923180928595
+        },
+        {
+          "decile": 5,
+          "n_treatment": 237067,
+          "n_control": 42577,
+          "predicted_uplift": 0.0010437655728269188,
+          "observed_uplift": 0.0006769221959445665,
+          "se": 0.0002552816886064645,
+          "ci_low": 0.00017657008627589607,
+          "ci_high": 0.0011772743056132368
+        },
+        {
+          "decile": 6,
+          "n_treatment": 237287,
+          "n_control": 42354,
+          "predicted_uplift": 0.001756107809438133,
+          "observed_uplift": 0.0002785495592339026,
+          "se": 0.0003667956836072063,
+          "ci_low": -0.0004403699806362218,
+          "ci_high": 0.000997469099104027
+        },
+        {
+          "decile": 7,
+          "n_treatment": 237107,
+          "n_control": 42530,
+          "predicted_uplift": 0.0033357380846109003,
+          "observed_uplift": 0.0011483204535323189,
+          "se": 0.0005582314306206562,
+          "ci_low": 5.41868495158328e-05,
+          "ci_high": 0.0022424540575488048
+        },
+        {
+          "decile": 8,
+          "n_treatment": 236990,
+          "n_control": 42650,
+          "predicted_uplift": 0.0063991010426003875,
+          "observed_uplift": 0.0016248171491547933,
+          "se": 0.000791848685951399,
+          "ci_low": 7.279372469005127e-05,
+          "ci_high": 0.0031768405736195353
+        },
+        {
+          "decile": 9,
+          "n_treatment": 237985,
+          "n_control": 41656,
+          "predicted_uplift": 0.016346322048231485,
+          "observed_uplift": 0.009030694049831728,
+          "se": 0.0014179404932598853,
+          "ci_low": 0.006251530683042353,
+          "ci_high": 0.011809857416621102
+        },
+        {
+          "decile": 10,
+          "n_treatment": 241979,
+          "n_control": 37663,
+          "predicted_uplift": 0.05172549216455783,
+          "observed_uplift": 0.05841353074064776,
+          "se": 0.002461198621910045,
+          "ci_low": 0.053589581441704066,
+          "ci_high": 0.06323748003959144
+        }
+      ],
+      "vs_reference": {
+        "reference": "t_learner",
+        "diff": 0.017051120434970344,
+        "ci": [
+          0.010601537457365797,
+          0.02343743509884291
+        ],
+        "resolved": true
+      }
+    }
+  },
+  "_provenance_note": "Produced by the run described in docs/findings.md sections 10-11. The x_learner column here uses the ORIGINAL propensity-weighted blending weight, which scored qini=-0.0016; fit_x_learner now defaults to blend=0.5, so re-running train+evaluate will change the x_learner row (expected qini ~+0.08) and nothing else. Kept as-is so the documented numbers and this artifact agree."
+}
