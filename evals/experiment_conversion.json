@@ -1,0 +1,222 @@
+{
+  "outcome": "conversion",
+  "n": 13979592,
+  "n_treatment": 11882655,
+  "n_control": 2096937,
+  "srm": {
+    "n_treatment": 11882655,
+    "n_control": 2096937,
+    "observed_ratio": 0.8500001287591226,
+    "expected_ratio": 0.85,
+    "chi2": 1.817775848947767e-06,
+    "p_value": 0.9989242531217909,
+    "is_srm": false,
+    "abs_deviation": 1.2875912258625277e-07,
+    "ratio_ci": [
+      0.8498128420968949,
+      0.8501872704580005
+    ],
+    "detectable_deviation_at_80pct_power": 0.000394624194635998
+  },
+  "balance": [
+    {
+      "feature": "f3",
+      "mean_treatment": 4.169411640899901,
+      "mean_control": 4.232820957687828,
+      "smd": -0.04883634026324019,
+      "var_ratio": 1.1856811617333507,
+      "balanced": true
+    },
+    {
+      "feature": "f6",
+      "mean_treatment": -4.1827923926987065,
+      "mean_control": -3.9998797265488255,
+      "smd": -0.04044806888649284,
+      "var_ratio": 1.072849870573535,
+      "balanced": true
+    },
+    {
+      "feature": "f5",
+      "mean_treatment": 4.0266023053078985,
+      "mean_control": 4.039338647301743,
+      "smd": -0.030556830660414907,
+      "var_ratio": 1.2208842777809092,
+      "balanced": true
+    },
+    {
+      "feature": "f9",
+      "mean_treatment": 16.05258862254133,
+      "mean_control": 15.886252389523134,
+      "smd": 0.02400105773455969,
+      "var_ratio": 1.0761034563732315,
+      "balanced": true
+    },
+    {
+      "feature": "f1",
+      "mean_treatment": 10.070336468853249,
+      "mean_control": 10.067935192469877,
+      "smd": 0.023994400679302374,
+      "var_ratio": 1.3164475024982383,
+      "balanced": true
+    },
+    {
+      "feature": "f8",
+      "mean_treatment": 3.933391878647928,
+      "mean_control": 3.9346517722432726,
+      "smd": -0.022433335895262342,
+      "var_ratio": 1.0520231399589883,
+      "balanced": true
+    },
+    {
+      "feature": "f7",
+      "mean_treatment": 5.105555333120273,
+      "mean_control": 5.080284340120637,
+      "smd": 0.02126952997581918,
+      "var_ratio": 1.08632112383574,
+      "balanced": true
+    },
+    {
+      "feature": "f10",
+      "mean_treatment": 5.333659929290435,
+      "mean_control": 5.331898215658715,
+      "smd": 0.010563463240729275,
+      "var_ratio": 1.051298811176425,
+      "balanced": true
+    },
+    {
+      "feature": "f4",
+      "mean_treatment": 10.339245221446188,
+      "mean_control": 10.33652566617022,
+      "smd": 0.007965661878540847,
+      "var_ratio": 1.0323536839753715,
+      "balanced": true
+    },
+    {
+      "feature": "f0",
+      "mean_treatment": 19.614754927917357,
+      "mean_control": 19.651704598341983,
+      "smd": -0.006865618372250798,
+      "var_ratio": 0.9953477514439066,
+      "balanced": true
+    },
+    {
+      "feature": "f2",
+      "mean_treatment": 8.446301724837399,
+      "mean_control": 8.448173251434486,
+      "smd": -0.00624099454533799,
+      "var_ratio": 0.9893749495350633,
+      "balanced": true
+    },
+    {
+      "feature": "f11",
+      "mean_treatment": -0.17098480762494814,
+      "mean_control": -0.17086775002078694,
+      "smd": -0.0051595279790242286,
+      "var_ratio": 1.0373402677420216,
+      "balanced": true
+    }
+  ],
+  "max_abs_smd": 0.04883634026324019,
+  "ate": {
+    "difference_in_means": {
+      "method": "difference-in-means",
+      "ate": 0.0011518730521316279,
+      "se": 3.4371690289992735e-05,
+      "ci_low": 0.001084505777075477,
+      "ci_high": 0.0012192403271877787,
+      "p_value": 3.1948074770259376e-246,
+      "relative_lift": 0.5944881177252619,
+      "relative_ci": [
+        0.5436975672882334,
+        0.646949772702688
+      ],
+      "baseline_rate": 0.0019375880152813366,
+      "n": 13979592
+    },
+    "difference_in_means_subsample": {
+      "method": "difference-in-means (sub)",
+      "ate": 0.0011156711836712067,
+      "se": 9.18419198712429e-05,
+      "ci_low": 0.000935664328452557,
+      "ci_high": 0.0012956780388898564,
+      "p_value": 5.8977854237557625e-34,
+      "relative_lift": 0.561315512524269,
+      "relative_ci": [
+        0.4346502664427738,
+        0.6991640308918159
+      ],
+      "baseline_rate": 0.0019876008390610255,
+      "n": 2000000,
+      "n_used": 2000000
+    },
+    "lin": {
+      "method": "Lin regression-adjusted",
+      "ate": 0.0009796289762494903,
+      "se": 9.015504733612419e-05,
+      "ci_low": 0.0008029283304461831,
+      "ci_high": 0.0011563296220527975,
+      "p_value": 1.6729322314281483e-27,
+      "relative_lift": 0.49287007582079845,
+      "relative_ci": [
+        0.40396860107258725,
+        0.5817715505690098
+      ],
+      "baseline_rate": 0.0019876008390610255,
+      "n": 2000000,
+      "n_used": 2000000
+    },
+    "cupac": {
+      "method": "CUPAC-adjusted",
+      "ate": 0.0009975029942592634,
+      "se": 8.634740720994391e-05,
+      "ci_low": 0.0008282651859693592,
+      "ci_high": 0.0011667408025491676,
+      "p_value": 7.194998675291526e-31,
+      "relative_lift": 0.5102423905968337,
+      "relative_ci": [
+        0.4236739247594617,
+        0.5968108564342058
+      ],
+      "baseline_rate": 0.0019549590795317454,
+      "n": 2000000,
+      "n_used": 2000000
+    }
+  },
+  "cuped": {
+    "theta": 1.0123244143091163,
+    "correlation": 0.33215707634741876,
+    "variance_reduction": 0.11032832336757403,
+    "se_before": 9.116379336525199e-05,
+    "se_after": 8.634740720994391e-05,
+    "se_reduction": 0.05283222623274353,
+    "effective_sample_multiplier": 1.124010155954596,
+    "n_used": 2000000
+  },
+  "power": {
+    "mde_absolute": 9.228073955439707e-05,
+    "mde_relative": 0.04762660525694775,
+    "n_total": 13979592,
+    "treatment_share": 0.85,
+    "baseline_rate": 0.0019375880152813366,
+    "power": 0.8,
+    "alpha": 0.05,
+    "allocation_efficiency": 0.51,
+    "n_equivalent_balanced": 7129591
+  },
+  "allocation_table": [
+    {
+      "treatment_share": 0.5,
+      "allocation_efficiency": 1.0,
+      "variance_multiple_vs_balanced": 1.0,
+      "mde_relative_pct": 3.401219927369551,
+      "n_multiple_for_same_mde": 1.0
+    },
+    {
+      "treatment_share": 0.85,
+      "allocation_efficiency": 0.51,
+      "variance_multiple_vs_balanced": 1.9607843137254897,
+      "mde_relative_pct": 4.762660525694775,
+      "n_multiple_for_same_mde": 1.9607843137254901
+    }
+  ]
+}

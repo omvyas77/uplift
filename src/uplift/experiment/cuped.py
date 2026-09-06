@@ -21,7 +21,7 @@ from dataclasses import asdict, dataclass
 
 import numpy as np
 from lightgbm import LGBMRegressor
-from sklearn.model_selection import KFold
+from sklearn.model_selection import GroupKFold, KFold
 
 
 @dataclass(frozen=True)
@@ -59,6 +59,19 @@ def cuped_adjust(y: np.ndarray, covariate: np.ndarray) -> tuple[np.ndarray, floa
     return y - theta * (covariate - covariate.mean()), theta
 
 
+def feature_groups(X: np.ndarray) -> np.ndarray:
+    """A group id per row, keyed on the exact feature vector.
+
+    Needed because this dataset has 1.26M exact-duplicate rows. Plain KFold
+    shuffles rows independently, so a duplicate's twin lands in another fold and
+    the model MEMORISES its outcome instead of predicting it - which would
+    inflate rho and therefore the reported variance reduction. Grouping on the
+    feature vector keeps every copy of a row on the same side of the split.
+    """
+    _, groups = np.unique(np.ascontiguousarray(X), axis=0, return_inverse=True)
+    return np.asarray(groups).ravel()
+
+
 def build_cupac_covariate(
     X: np.ndarray,
     y: np.ndarray,
@@ -66,6 +79,7 @@ def build_cupac_covariate(
     n_folds: int = 5,
     seed: int = 0,
     n_estimators: int = 300,
+    grouped: bool = True,
 ) -> np.ndarray:
     """Cross-fitted E[Y | X] fitted on CONTROL units only.
 
@@ -73,10 +87,17 @@ def build_cupac_covariate(
     treatment information, so it remains a legitimate pre-treatment covariate.
     Fit it on the treated units and you would be smuggling the effect you are
     trying to measure into the adjustment.
+
+    `grouped=True` additionally keeps every duplicate of a feature vector in the
+    same fold - see `feature_groups`. It is the default because on this data
+    plain KFold cannot distinguish prediction from memorisation.
     """
     pred = np.zeros(len(y))
-    kf = KFold(n_splits=n_folds, shuffle=True, random_state=seed)
-    for train_idx, test_idx in kf.split(X):
+    if grouped:
+        splitter = GroupKFold(n_splits=n_folds).split(X, groups=feature_groups(X))
+    else:
+        splitter = KFold(n_splits=n_folds, shuffle=True, random_state=seed).split(X)
+    for train_idx, test_idx in splitter:
         ctrl = train_idx[w[train_idx] == 0]
         model = LGBMRegressor(
             n_estimators=n_estimators,
