@@ -45,6 +45,7 @@ def evaluate_and_write(
     outcome: str = "visit",
     n_boot: int = 200,
     eval_sample: int | None = None,
+    boot_sample: int | None = 1_000_000,
     split: str = "test",
     reference: str = "t_learner",
     write: bool = True,
@@ -64,7 +65,9 @@ def evaluate_and_write(
     results: dict[str, Any] = {}
     for name in model_names:
         tau = df[name].to_numpy()
-        mean, lo, hi = bootstrap_qini_ci(y, w, tau, n_boot=n_boot, seed=settings.random_seed)
+        mean, lo, hi = bootstrap_qini_ci(
+            y, w, tau, n_boot=n_boot, seed=settings.random_seed, boot_sample=boot_sample
+        )
         cal = cate_calibration(y, w, tau)
         results[name] = {
             "qini": sklift_qini(y, tau, w),
@@ -122,6 +125,13 @@ def evaluate_and_write(
         },
         "outcome": outcome,
         "n_boot": n_boot,
+        "boot_sample": boot_sample,
+        "boot_note": (
+            "point estimates use the full split; bootstrap replicates draw "
+            f"{boot_sample} rows, so intervals are conservative (wider) by ~sqrt(n/b)"
+        )
+        if boot_sample
+        else "full-size bootstrap",
         "reference_model": ref,
         "ranking": order,
         "n_models_resolved_vs_reference": n_resolved,

@@ -149,17 +149,55 @@ class ClassTransformation:
 
 
 # ---------- 4-6. EconML wrappers ----------
-def fit_x_learner(X, w, y, seed: int = 0):
-    """X-learner: imputes the effect within each arm, then blends by propensity.
-    Designed for exactly the unbalanced-arm case this dataset has."""
+class _ConstantPropensity:
+    """A propensity model that returns a fixed g(x).
+
+    Exists only to control the X-learner's BLENDING weight, which is a different
+    quantity from the assignment probability even though the literature suggests
+    reusing the propensity for it. See `fit_x_learner`.
+    """
+
+    def __init__(self, p: float):
+        self.p = float(p)
+        self.classes_ = np.array([0, 1])
+
+    def fit(self, X, y):
+        return self
+
+    def predict_proba(self, X):
+        n = len(X)
+        return np.column_stack([np.full(n, 1.0 - self.p), np.full(n, self.p)])
+
+
+def fit_x_learner(X, w, y, seed: int = 0, blend: float | None = 0.5):
+    """X-learner: impute the effect within each arm, then blend the two.
+
+    tau(x) = g(x) * tau_0(x) + (1 - g(x)) * tau_1(x)
+
+    where tau_0 is imputed using the CONTROL outcome model and tau_1 using the
+    treated one. Kuenzel et al. suggest reusing the propensity score as g, and
+    that is actively harmful on an 85/15 design: it sets g = 0.85, putting 85%
+    of the weight on tau_0 - the arm with 15% of the data and therefore the
+    noisier of the two. The paper's own reasoning says g should be SMALL when
+    tau_0 is noisy, so reusing the propensity gets it backwards here.
+
+    Measured on a 400k train / 600k validation slice of this data:
+
+        g = LogisticRegression propensity (~0.85)   qini +0.0429
+        g = 0.85                                    qini +0.0459
+        g = 0.15  (= 1 - treated share)             qini +0.0807
+        g = 0.50                                    qini +0.0854
+
+    With the propensity weighting the full-data fit scored qini = -0.0016 on the
+    test split - no ranking signal at all, and a decile rank correlation of
+    -0.44. `blend=0.5` is therefore the default; pass `blend=None` to restore the
+    textbook propensity-weighted behaviour.
+    """
     from econml.metalearners import XLearner
 
     _check(X, w, y)
-    est = XLearner(
-        models=_base_clf(seed),
-        propensity_model=LogisticRegression(max_iter=1000),
-        cate_models=_base_reg(seed),
-    )
+    prop = LogisticRegression(max_iter=1000) if blend is None else _ConstantPropensity(blend)
+    est = XLearner(models=_base_clf(seed), propensity_model=prop, cate_models=_base_reg(seed))
     est.fit(y, w, X=X)
     return est
 
