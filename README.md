@@ -77,11 +77,12 @@ leverage is.
 
 | Model | Qini | 95% CI | vs T-learner |
 |---|---|---|---|
-| S-learner | **0.0893** | [+0.0777, +0.1010] | +0.0184, resolved |
-| Causal forest | 0.0877 | [+0.0782, +0.0991] | +0.0171, resolved |
-| Class transformation | 0.0828 | [+0.0714, +0.0929] | +0.0118, resolved |
-| DR-learner | 0.0749 | [+0.0630, +0.0876] | +0.0038, **overlapping** |
-| T-learner | 0.0712 | [+0.0605, +0.0814] | (reference) |
+| S-learner | **0.0893** | [+0.0779, +0.1005] | +0.0182, resolved |
+| Causal forest | 0.0877 | [+0.0762, +0.0980] | +0.0165, resolved |
+| Class transformation | 0.0828 | [+0.0715, +0.0942] | +0.0114, resolved |
+| X-learner | 0.0778 | [+0.0680, +0.0890] | +0.0066, resolved (barely) |
+| DR-learner | 0.0749 | [+0.0651, +0.0860] | +0.0040, **overlapping** |
+| T-learner | 0.0712 | [+0.0620, +0.0825] | (reference) |
 
 > The DR-learner is **not distinguishable** from the T-learner even at 2.8M
 > held-out rows. Publishing this leaderboard without intervals would have
@@ -92,9 +93,10 @@ Two findings fell out of running this at full scale:
 - **The X-learner scored Qini −0.0016 — actively anti-ranked** (decile rank
   correlation −0.44). The cause is EconML's default of reusing the propensity as
   the blending weight: on an 85/15 design that puts 85% of the weight on the
-  effect model imputed from the 15% arm. Setting `blend=0.5` roughly doubles its
-  Qini. The bug looked like mild underperformance at 400k rows and became total
-  failure at 1.5M — an argument for evaluating at the scale you ship.
+  effect model imputed from the 15% arm. Setting `blend=0.5` moves it to
+  **+0.0778**, with every other model bit-identical. The bug looked like mild
+  underperformance at 400k rows and was total failure at 1.5M — an argument for
+  evaluating at the scale you ship.
 - **The S-learner leads despite its degeneracy diagnostic firing**
   (`treatment_gain_share = 0.0023`). The diagnostic flags a real pathology in how
   the model represents the effect; it does not by itself predict poor ranking.
