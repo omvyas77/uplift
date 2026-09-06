@@ -64,20 +64,55 @@ extremely skewed (|skew| up to 14.8).
 So the arms differ in the *mean* of every feature while agreeing on the
 *median* of almost all of them. The imbalance lives in the tails.
 
-Three candidate explanations were tested and two were ruled out:
+Candidate explanations, tested:
 
-- **Duplicate rows?** No. The file contains 1,259,545 exact duplicate rows
-  (9.0%), and the duplication rate is very different by arm — 10.2% of treated
-  rows versus 2.3% of control rows. But removing them makes the imbalance
-  **worse**, not better: max |SMD| goes from 0.0488 to 0.0849. The duplicates
-  were partially masking the imbalance.
-- **Outcome-dependent subsampling?** Not the whole story. Stratifying by the
-  outcome gives max |SMD| of 0.024 among non-visitors and 0.250 among visitors,
-  but `visit` is post-treatment, so conditioning on it *should* induce
-  imbalance — that is collider stratification, and the visitor stratum is a
-  textbook demonstration of it rather than evidence about the design.
-- **Heavy tails inflating a mean-based statistic?** This is what the evidence
-  supports: identical medians, significantly different means, |skew| up to 15.
+- **Duplicate rows? No — and my first reading of this was wrong.** The file has
+  1,259,545 exact duplicate rows (9.0%), and the rate differs sharply by arm:
+  10.3% of treated rows versus 2.3% of control. That asymmetry looked alarming
+  until it was decomposed. Duplication is a function of how many rows land in
+  each distinct feature cell, and the treated arm has 5.7× more rows in the same
+  feature space:
+
+  | arm | rows | distinct cells | rows per cell | duplicate fraction |
+  |---|---|---|---|---|
+  | control | 2,096,937 | 2,047,781 | 1.0240 | 2.3% |
+  | treated | 11,882,655 | 10,661,560 | 1.1145 | 10.3% |
+
+  Duplicate fraction tracks rows-per-cell exactly. The asymmetry is **arm size,
+  not data quality** — a pigeonhole consequence of 8 of the 12 features being
+  near-discrete (see below).
+
+  This also **retracts** an earlier claim in this document. Deduplicating raises
+  max |SMD| from 0.0488 to 0.0849, which was first read as "the duplicates were
+  masking the imbalance". That inference is invalid: deduplication removes
+  proportionally more treated rows, shifting the arm ratio from 0.8500 to
+  0.8389. It is a *biased* operation on this file and cannot be used as a
+  balance diagnostic at all.
+
+- **Heavy tails?** Yes, and the structure is now explicit. Eight of the twelve
+  features are effectively categorical — `f1` takes only **60 distinct values
+  across 14M rows**, `f5` 132, `f11` 136, `f4` 260, `f3` 552 — and 98.77% of all
+  rows share a single `f1` value. The remaining 1.2% form a long tail in which
+  the visit rate climbs monotonically from 4.4% to 48%.
+
+- **Strata with unequal treated shares? Yes — this is the mechanism.** Clustering
+  the covariates (k-means, k=20, 2M rows) and recomputing balance *within*
+  cluster halves the imbalance:
+
+  ```
+  pooled            max |SMD| = 0.0476
+  within-cluster    max |SMD| = 0.0224   (size-weighted)
+  ```
+
+  And the treated share varies systematically across clusters in a specific
+  direction — **corr(cluster visit rate, cluster treatment ratio) = +0.50
+  Pearson (p = 0.026), +0.60 Spearman (p = 0.005)**. Cluster visit rates span
+  0.11% to 61%, a 555× range, and the high-propensity strata carry treatment
+  ratios up to 0.880 against 0.844 in the low-propensity ones.
+
+  So users more likely to visit anyway are over-represented in the treated arm.
+  That biases an unadjusted difference-in-means **upward**, which is exactly the
+  direction and roughly the magnitude of the adjustment gap below.
 
 ### What this changes
 
@@ -92,12 +127,18 @@ Lin regression-adjusted  ATE = +0.007760   (−25%)
 CUPAC-adjusted           ATE = +0.007919   (−23%)
 ```
 
-The two covariate-adjusted estimators agree with each other and disagree with
-the raw difference by about a quarter. Under clean randomization they should all
+**The adjusted number is the one to quote: +20.2%, not +27.1%.** The two
+covariate-adjusted estimators agree with each other and disagree with the raw
+difference by about a quarter. Under clean randomization they should all
 agree, and adjustment should only tighten the interval. They diverge here
 because the covariates are both **imbalanced** (this section) and **strongly
 predictive of the outcome** (section 4) — which is exactly the condition under
 which adjustment moves a point estimate rather than merely sharpening it.
+
+Subsampling is ruled out as the explanation: difference-in-means on the *same*
+2M rows the adjusted estimators used gives +0.010204, essentially the full-data
++0.010342. Lin therefore sits **7.1 standard errors** below the unadjusted
+estimate on identical data.
 
 Consequences carried through the repo:
 
@@ -170,3 +211,68 @@ Integrating at block boundaries instead fixes it: symmetry improves from 0.025
 to 6e-5, and the change is a no-op on continuous scores (verified). Kept as
 `tie_aware=True` with the alternative still reachable, and guarded by
 `test_reversed_ranking_flips_the_sign` and `test_tie_aware_curve_collapses_tied_blocks`.
+
+---
+
+## 8. The secondary outcome — `conversion`
+
+Revenue lives here, so it is reported despite the 0.29% base rate that makes it
+a poor ranking target.
+
+| Estimator | ATE | 95% CI | Relative | n |
+|---|---|---|---|---|
+| Difference-in-means | +0.001152 | [+0.001085, +0.001219] | **+59.4%** | 14.0M |
+| Difference-in-means (same 2M) | +0.001116 | [+0.000936, +0.001296] | +56.1% | 2M |
+| Lin regression-adjusted | +0.000980 | [+0.000803, +0.001156] | **+49.3%** | 2M |
+| CUPAC-adjusted | +0.000998 | [+0.000828, +0.001167] | +51.0% | 2M |
+
+Adjustment moves the estimate down here too, from +56.1% to +49.3% — the same
+direction as `visit`, as the shared mechanism in section 3 requires. But the gap
+is only **1.5 standard errors** against `visit`'s 7.1, because a 0.29% outcome
+carries far less information. Do not present the conversion adjustment as
+resolved; present it as consistent in sign with a much better-resolved result.
+
+CUPAC on `conversion`: rho = 0.3322, variance reduction **11.03%** (≈1.12x
+sample) — materially lower than `visit`'s 31%, exactly as the rho-squared bound
+predicts for a rarer outcome.
+
+Design MDE for `conversion` is **4.76% relative** at 80% power, against 1.05%
+for `visit`. That is the honest statement of what this experiment can and cannot
+resolve on the revenue metric.
+
+## 9. What the numbers mean commercially
+
+Assumptions, stated because every figure below is a function of them:
+**$25.00 per conversion**, **$0.01 per treatment**. Both live in
+`src/uplift/config.py` and are exposed as dashboard sliders.
+
+| | Unadjusted | Adjusted (defensible) |
+|---|---|---|
+| Incremental visits caused | 122,895 | **92,214** |
+| — as a share of the 576,824 visits in the treated arm | 21.3% | **16.0%** |
+| Incremental conversions caused | 13,687 | **11,641** |
+| — as a share of 36,711 conversions in the treated arm | 37.3% | **31.7%** |
+| Campaign cost (11,882,655 × $0.01) | $118,827 | $118,827 |
+| Incremental revenue | $342,183 | **$291,015** |
+| Net | $223,356 | **$172,188** |
+| ROAS | 2.88x | **2.45x** |
+| Cost per incremental visit | $0.97 | **$1.29** |
+
+The headline reframe: of the 576,824 visits a marketing dashboard would credit
+to this campaign, roughly **92,000 were actually caused by it**. Six out of seven
+would have happened without spending a cent.
+
+**The operational finding is bigger than the modelling one.** Only 3.6% of
+targeted users were ever shown an ad — 11.9M "targeted", ~428,000 reached. The
+entire measured lift comes from that 3.6%. Delivery, not targeting, is where the
+leverage is: taking delivery from 3.6% to 7% would roughly double impact before
+anyone touches a model. Caveat that honestly — the next tranche of reachable
+users is probably less responsive than the current one, so "roughly double" is
+an upper bound.
+
+**On CACE.** ITT / 0.036 = +28.7 percentage points is arithmetically right and
+stays in the repo as a secondary estimand, but it describes 3.6% of the
+population and leans on an exclusion restriction that is shaky here — being
+*reachable* correlates with actively browsing, which correlates with visiting.
+It is not a stakeholder number and will be misquoted within a day if presented
+as one.
