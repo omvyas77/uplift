@@ -60,6 +60,25 @@ class Settings(BaseSettings):
     value_per_conversion_usd: float = 25.0
     cost_per_treatment_usd: float = 0.01
 
+    # P(conversion | visit), measured on the full file: 0.002917 / 0.046992.
+    # This exists so that a policy optimising the PRIMARY outcome (visit) is not
+    # valued at the price of a CONVERSION - a units error that overstates profit
+    # by ~16x. See `value_per_outcome`.
+    conversions_per_visit: float = 0.062068
+
+    def value_per_outcome(self, outcome: str) -> float:
+        """Dollar value of one incremental unit of `outcome`.
+
+        Only `conversion` is worth `value_per_conversion_usd`. A visit is worth
+        that times the probability it converts, so the two outcomes are priced on
+        one consistent scale rather than both at the conversion price.
+        """
+        if outcome in ("conversion", "converted"):
+            return self.value_per_conversion_usd
+        if outcome in ("visit", "visited"):
+            return self.value_per_conversion_usd * self.conversions_per_visit
+        raise ValueError(f"no value assumption for outcome {outcome!r}")
+
     @property
     def criteo_csv_path(self) -> Path:
         return self.data_dir / self.criteo_filename

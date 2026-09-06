@@ -362,3 +362,117 @@ Two things worth stating plainly:
   the second best of the six. The diagnostic flags a real pathology in how the
   model represents the effect; it does not by itself predict poor ranking, and
   conflating the two would be a mistake.
+
+---
+
+## 12. The bias table — observational estimators against RCT ground truth
+
+Confounding injected at strength 1.0 on 2M rows; 1,052,060 survive the selection.
+Ground truth is the s(X)-weighted ATE computed from the RCT, which is the correct
+target for the slice under an 85/15 design (see `inject_confounding`).
+
+| Estimator | Estimate | Bias | Relative error |
+|---|---|---|---|
+| Ground truth (from the RCT) | 0.005314 | — | — |
+| **Naive difference-in-means** | −0.032148 | −0.037462 | **−705%** |
+| IPW (clipped, stabilized) | 0.001404 | −0.003910 | −73.6% |
+| **Propensity matching (1:1)** | 0.004590 | −0.000724 | **−13.6%** |
+| AIPW / doubly robust | 0.002641 | −0.002673 | −50.3% |
+
+The headline holds: the naive comparison is not merely biased but **sign-flipped**,
+reporting a negative effect where the truth is positive, and adjustment recovers
+the sign and most of the magnitude.
+
+Two honest departures from what the build guide anticipates:
+
+- **Matching wins here, not AIPW.** The guide expects the doubly-robust estimator
+  to be best. At strength 1.0 matching lands within 13.6% and AIPW within 50.3%.
+  AIPW is nonetheless the most *robust* — see the strength curve below, where it
+  is the only estimator still improving at strength 4.0.
+- **Relative errors are inflated by a small denominator.** The s(X)-weighting
+  halves the target, from a population ATE of ~0.0105 to 0.0053, so a −0.0027
+  absolute bias reads as −50%. Judge these on the absolute column too.
+
+### Bias against confounding strength
+
+| strength | truth | naive | IPW | matching | AIPW | treated outside control support |
+|---|---|---|---|---|---|---|
+| 0.0 | 0.010473 | **+0.000040** | −0.004864 | −0.002015 | −0.003163 | 1.6% |
+| 0.5 | 0.006297 | −0.023955 | −0.002778 | −0.001231 | −0.002191 | 3.5% |
+| 1.0 | 0.005314 | −0.037462 | −0.003910 | −0.000724 | −0.002673 | 9.4% |
+| 2.0 | 0.004888 | −0.050614 | −0.004268 | −0.005621 | −0.002552 | 22.8% |
+| 4.0 | 0.004778 | −0.057434 | −0.011023 | −0.004876 | **+0.001705** | 65.9% |
+
+The strength-0 row is the setup's own validation: with no confounding injected
+the naive bias is +0.000040, i.e. zero. If that row were not ~0 the whole
+apparatus would be measuring its own bug.
+
+As strength rises, overlap collapses — minimum propensity falls from 0.44 to
+2.0×10⁻⁷ and the share of treated units with no control counterpart goes from
+1.6% to 65.9%. **IPW degrades fastest** (−0.0039 → −0.0110), which is the
+expected failure: it divides by propensities approaching zero. AIPW is the only
+estimator whose bias does not grow. That is the concrete answer to "when should I
+*not* trust a propensity-score analysis" — when this diagnostic, not the point
+estimate, says overlap is gone.
+
+### Negative controls
+
+```
+on the raw RCT            max|z| =  26.18     <- baseline for THIS file
+on the confounded slice   max|z| = 331.47
+after IPW reweighting     max|z| =  13.93     -> 104% of injected imbalance removed
+```
+
+The RCT baseline is **not** ~0, because Criteo v2.1 carries real covariate
+imbalance (section 3). The negative-control check therefore fails on the raw
+RCT — which is independent confirmation of that finding by a completely
+different method than the SMD analysis that first found it. Adjustment must be
+judged against 26.18, not against zero.
+
+Reweighting overshoots slightly (13.93 is *below* the RCT baseline), because the
+propensity model fitted on the confounded slice also absorbs part of the file's
+native imbalance.
+
+## 13. ITT vs CACE vs the invalid comparison
+
+```
+ITT                        +0.010473  [+0.009715, +0.011231]   always valid
+first stage P(exposed|Z=1)  0.035989
+CACE                       +0.291005  [+0.269943, +0.312066]   27.8x the ITT
+naive exposed-vs-control   +0.378360                           1.30x the CACE - INVALID
+```
+
+Conditioning on `exposure` — a post-treatment variable — overstates the complier
+effect by 30%, and overstates the ITT, the number a launch decision actually
+needs, by a factor of 36.
+
+## 14. From scores to a decision, and a pricing bug worth recording
+
+Off-policy evaluation on the held-out randomized test split, where the propensity
+is known by design.
+
+| Policy | Treated | DR value | 95% CI |
+|---|---|---|---|
+| Treat nobody | 0% | 0.03796 | [0.03699, 0.03893] |
+| Treat everybody | 100% | **0.04838** | [0.04793, 0.04884] |
+| Model targeting | 18.1% | 0.04715 | [0.04651, 0.04778] |
+| Random at same budget | 18.1% | 0.03990 | [0.03900, 0.04081] |
+
+**Model targeting beats random at the same budget by +0.00725 (SE 0.00056),
+about 12.8 standard errors.** That is the row most projects omit and the only one
+that shows the model is doing work.
+
+But **treat-everybody has the highest raw value**, and saying otherwise would be
+dishonest. The model policy wins only once treatment cost is counted; on outcome
+alone, with a positive effect nearly everywhere and a very cheap treatment,
+blanket treatment is hard to beat. The targeting case here is efficiency, not
+raw lift.
+
+**The pricing bug.** The first run valued an incremental *visit* at
+`value_per_conversion_usd` = $25 — but $25 is the price of a **conversion**. A
+visit converts with probability 0.0621, so it is worth about **$1.55**. The error
+was not cosmetic: it moved the optimal treated fraction from **52.8% to 18.1%**
+and expected profit from **$191,860 to $9,443**, a 20× overstatement, because the
+break-even threshold `cost / value` was 16× too low. `Settings.value_per_outcome`
+now prices each outcome explicitly and the readout prints the conversion, the
+derived per-visit value, and the multiplier that connects them.
