@@ -61,7 +61,22 @@ def train_all(
     outcome: str = "visit",
     models: str = "all",
     seed: int | None = None,
+    score_splits: tuple[str, ...] = ("test",),
+    train_cap: int = 2_000_000,
 ) -> dict[str, Any]:
+    """Fit each learner and persist its holdout scores.
+
+    Cost is dominated by SCORING, not fitting. Measured on this box: a 400-tree
+    LightGBM predicts 200k rows in ~5s, so scoring 2.8M costs ~70s per
+    predict_proba call - and an S- or T-learner needs two of those per split.
+    Scoring `valid` as well as `test` therefore doubles the run for a split that
+    nothing currently consumes, so `score_splits` defaults to test only.
+
+    Threading is deliberately left at n_jobs=-1. It was measured, not assumed:
+    n_jobs=1 is 6x SLOWER on predict (48.5s vs 7.9s per 500k rows) and 1.6x
+    slower on fit, so the usual "pin threads to avoid oversubscription" advice
+    is backwards for this workload.
+    """
     seed = settings.random_seed if seed is None else seed
     wanted = ALL_MODELS if models == "all" else [m.strip() for m in models.split(",")]
     settings.ensure_dirs()
@@ -71,13 +86,13 @@ def train_all(
 
     scores: dict[str, dict[str, np.ndarray]] = {}
     meta: dict[str, Any] = {}
-    holdouts = {s: load_split(s, outcome=outcome) for s in ("valid", "test")}
+    holdouts = {s: load_split(s, outcome=outcome) for s in score_splits}
     for split_name, (_, _, yh) in holdouts.items():
         log.info("holdout_loaded", split=split_name, rows=len(yh))
 
     for name in wanted:
         t0 = time.time()
-        cap = ECONML_CAPS.get(name, len(X_tr))
+        cap = ECONML_CAPS.get(name, train_cap)
         Xs, ws, ys, n_used = _subsample(X_tr, w_tr, y_tr, cap, seed)
         log.info("fitting", model=name, rows=n_used)
 
