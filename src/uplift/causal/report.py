@@ -115,7 +115,12 @@ def causal_report(
                 "strength": s,
                 "n_kept": r["n_kept"],
                 "ground_truth": r["ground_truth"],
-                **{row["estimator"]: row["bias"] for row in r["rows"] if row["bias"] != 0.0},
+                # these columns are BIAS vs the slice's ground truth, not estimates
+                **{
+                    f"bias[{row['estimator']}]": row["bias"]
+                    for row in r["rows"]
+                    if not row["estimator"].startswith("ground")
+                },
                 "overlap_frac_below_01": r["overlap"]["frac_below"],
                 "overlap_ps_min": r["overlap"]["ps_min"],
                 "frac_treated_outside_control_support": r["overlap"][
@@ -145,6 +150,13 @@ def causal_report(
             "confounded": float(nc_conf["z"].abs().max()),
             "after_ipw": float(nc_adj["z"].abs().max()),
         },
+        # scale-free: how much of the INJECTED imbalance the adjustment removed,
+        # measured against the RCT baseline rather than against zero
+        "recovery_fraction": float(
+            1.0
+            - (nc_adj["z"].abs().max() - nc_rct["z"].abs().max())
+            / max(nc_conf["z"].abs().max() - nc_rct["z"].abs().max(), 1e-9)
+        ),
     }
 
     # ---------------- 6. E-value ----------------
@@ -177,9 +189,17 @@ def causal_report(
         "cannot be affected by treatment)"
     )
     m = out["negative_controls"]["max_abs_z"]
-    print(f"  on the RCT              max|z| = {m['rct']:8.2f}   <- should pass")
-    print(f"  on the confounded slice max|z| = {m['confounded']:8.2f}   <- should fail loudly")
-    print(f"  after IPW reweighting   max|z| = {m['after_ipw']:8.2f}   <- should recover")
+    print(f"  on the RCT              max|z| = {m['rct']:8.2f}   <- baseline for THIS file")
+    print(f"  on the confounded slice max|z| = {m['confounded']:8.2f}   <- must be far worse")
+    print(f"  after IPW reweighting   max|z| = {m['after_ipw']:8.2f}   <- must fall back toward it")
+    print(
+        f"  recovery = {100 * out['negative_controls']['recovery_fraction']:.1f}% of the "
+        "injected imbalance removed"
+    )
+    print("  NOTE: the RCT baseline is NOT ~0 on this dataset. Criteo v2.1 carries real")
+    print("  covariate imbalance (docs/findings.md section 3), so the negative control")
+    print("  fails on the raw RCT too - independent confirmation of that finding by a")
+    print("  second method. Judge adjustment against this baseline, not against zero.")
     print()
     print(
         f"E-VALUE  RR={out['e_value']['risk_ratio']:.4f}  "

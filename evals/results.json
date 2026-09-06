@@ -1,6 +1,6 @@
 {
-  "run_id": "2026-09-06T05:40:02.093132+00:00",
-  "git_sha": "7e2d7a7",
+  "run_id": "2026-09-06T20:34:58.665046+00:00",
+  "git_sha": "82a1b64",
   "dataset": {
     "name": "criteo-uplift-v2.1",
     "rows": 13979592,
@@ -17,18 +17,18 @@
     "s_learner",
     "causal_forest",
     "class_transformation",
+    "x_learner",
     "dr_learner",
-    "t_learner",
-    "x_learner"
+    "t_learner"
   ],
   "n_models_resolved_vs_reference": 4,
   "models": {
     "class_transformation": {
       "qini": 0.08283326395331157,
-      "qini_boot_mean": 0.08263347825365179,
+      "qini_boot_mean": 0.08249809193665404,
       "qini_ci": [
-        0.07144555139937195,
-        0.09289011109019421
+        0.0715164289641888,
+        0.0942282678688249
       ],
       "auuc": 0.032372621583704145,
       "uplift_at_30pct": 0.030215096059262564,
@@ -126,20 +126,20 @@
       ],
       "vs_reference": {
         "reference": "t_learner",
-        "diff": 0.011748735106500123,
+        "diff": 0.011442371974729184,
         "ci": [
-          0.006203120609854474,
-          0.018322043107290163
+          0.005356593457180952,
+          0.017182521147516096
         ],
         "resolved": true
       }
     },
     "s_learner": {
       "qini": 0.08932403060570301,
-      "qini_boot_mean": 0.08950982832603771,
+      "qini_boot_mean": 0.0893627092743857,
       "qini_ci": [
-        0.07766199822362159,
-        0.10104162013382419
+        0.0779200924095552,
+        0.10050651228165973
       ],
       "auuc": 0.03489015895704149,
       "uplift_at_30pct": 0.029354408399193857,
@@ -257,20 +257,20 @@
       ],
       "vs_reference": {
         "reference": "t_learner",
-        "diff": 0.018379016314736443,
+        "diff": 0.018204758390101872,
         "ci": [
-          0.011198621386149198,
-          0.024351575624989998
+          0.01272946173920114,
+          0.022963109769378112
         ],
         "resolved": true
       }
     },
     "t_learner": {
       "qini": 0.07117683727368909,
-      "qini_boot_mean": 0.0703997510660618,
+      "qini_boot_mean": 0.07131643008677199,
       "qini_ci": [
-        0.06051110237852187,
-        0.08142616722163175
+        0.06201932765661278,
+        0.08245628810766036
       ],
       "auuc": 0.027825995153701457,
       "uplift_at_30pct": 0.027835265079356145,
@@ -389,142 +389,142 @@
       "vs_reference": "(reference)"
     },
     "x_learner": {
-      "qini": -0.0015992059493658325,
-      "qini_boot_mean": -0.0016274346204964419,
+      "qini": 0.07779250468703254,
+      "qini_boot_mean": 0.07824840920581146,
       "qini_ci": [
-        -0.012724872928655253,
-        0.008545476800694597
+        0.067957602675398,
+        0.08898428792758904
       ],
-      "auuc": -0.000706632491066919,
-      "uplift_at_30pct": 0.015443388335650336,
-      "response_auc_not_the_objective": 0.41752619892597576,
-      "score_mean": -0.008003622528474124,
-      "score_sd": 0.06720416292357118,
-      "calibration_slope": 0.003436298821823613,
-      "calibration_intercept": 0.009039312299081349,
-      "calibration_slope_se": 0.10589134738539469,
-      "calibration_r2": 0.0001316175329528101,
-      "rank_correlation": -0.4424242424242424,
+      "auuc": 0.030411473917883982,
+      "uplift_at_30pct": 0.028769901449782198,
+      "response_auc_not_the_objective": 0.7063404039718003,
+      "score_mean": 0.007409807533308055,
+      "score_sd": 0.04265731704007651,
+      "calibration_slope": 0.6649699031962173,
+      "calibration_intercept": 0.002937211316879358,
+      "calibration_slope_se": 0.06818055514903915,
+      "calibration_r2": 0.922422305206103,
+      "rank_correlation": 0.5272727272727272,
       "n_deciles": 10,
-      "observed_spread": 0.03967002007808223,
+      "observed_spread": 0.058074728166839715,
       "calibration_table": [
         {
           "decile": 1,
-          "n_treatment": 238792,
-          "n_control": 40850,
-          "predicted_uplift": -0.11932918247172848,
-          "observed_uplift": 0.027544037547126754,
-          "se": 0.002117854064470518,
-          "ci_low": 0.02339304358076454,
-          "ci_high": 0.03169503151348897
+          "n_treatment": 238466,
+          "n_control": 42299,
+          "predicted_uplift": -0.013753980168663799,
+          "observed_uplift": 0.00714475681548199,
+          "se": 0.0016434906263351635,
+          "ci_low": 0.00392351518786507,
+          "ci_high": 0.01036599844309891
         },
         {
           "decile": 2,
-          "n_treatment": 238615,
-          "n_control": 41026,
-          "predicted_uplift": -0.020620238330443106,
-          "observed_uplift": 0.015114098615162039,
-          "se": 0.001032752719376523,
-          "ci_low": 0.013089903285184053,
-          "ci_high": 0.017138293945140024
+          "n_treatment": 306381,
+          "n_control": 55249,
+          "predicted_uplift": -0.00013274295691687984,
+          "observed_uplift": 0.0009159702028275897,
+          "se": 0.000247388099954277,
+          "ci_low": 0.0004310895269172068,
+          "ci_high": 0.0014008508787379725
         },
         {
           "decile": 3,
-          "n_treatment": 236645,
-          "n_control": 42996,
-          "predicted_uplift": -0.0072186033675178144,
-          "observed_uplift": 0.0037502107586822927,
-          "se": 0.0005879221871507146,
-          "ci_low": 0.0025978832718668923,
-          "ci_high": 0.004902538245497693
+          "n_treatment": 188612,
+          "n_control": 33809,
+          "predicted_uplift": -3.590147502642606e-05,
+          "observed_uplift": 0.00017888565138257797,
+          "se": 0.00013208612203013663,
+          "ci_low": -8.000314779648982e-05,
+          "ci_high": 0.00043777445056164576
         },
         {
           "decile": 4,
-          "n_treatment": 236984,
-          "n_control": 42658,
-          "predicted_uplift": -0.0036739114189002307,
-          "observed_uplift": 0.0016087741747997453,
-          "se": 0.0004288010269625959,
-          "ci_low": 0.0007683241619530573,
-          "ci_high": 0.0024492241876464334
+          "n_treatment": 215329,
+          "n_control": 38432,
+          "predicted_uplift": 1.4587476250395678e-05,
+          "observed_uplift": 0.0001411262878261044,
+          "se": 0.00024409710971228367,
+          "ci_low": -0.0003373040472099716,
+          "ci_high": 0.0006195566228621804
         },
         {
           "decile": 5,
-          "n_treatment": 236947,
-          "n_control": 42695,
-          "predicted_uplift": -0.0018600807569428468,
-          "observed_uplift": 0.0011459778399495846,
-          "se": 0.0003187054777092502,
-          "ci_low": 0.0005213151036394542,
-          "ci_high": 0.0017706405762597148
+          "n_treatment": 345103,
+          "n_control": 61542,
+          "predicted_uplift": 0.0001389191321683339,
+          "observed_uplift": 0.00020771511902572138,
+          "se": 0.00014742221052131357,
+          "ci_low": -8.123241359605322e-05,
+          "ci_high": 0.000496662651647496
         },
         {
           "decile": 6,
-          "n_treatment": 237390,
-          "n_control": 42289,
-          "predicted_uplift": -0.0006914284425205416,
-          "observed_uplift": 0.0005953248836729345,
-          "se": 0.00018815228661497963,
-          "ci_low": 0.00022654640190757438,
-          "ci_high": 0.0009641033654382945
+          "n_treatment": 129650,
+          "n_control": 23197,
+          "predicted_uplift": 0.00023366595864237182,
+          "observed_uplift": 0.00031747426147785184,
+          "se": 0.0004410256390413242,
+          "ci_low": -0.0005469359910431436,
+          "ci_high": 0.0011818845139988472
         },
         {
           "decile": 7,
-          "n_treatment": 237179,
-          "n_control": 42440,
-          "predicted_uplift": -0.000592808186421496,
-          "observed_uplift": 0.00035216316318182304,
-          "se": 9.317614036003661e-05,
-          "ci_low": 0.0001695379280761513,
-          "ci_high": 0.0005347883982874948
+          "n_treatment": 237040,
+          "n_control": 42437,
+          "predicted_uplift": 0.00048442512121708495,
+          "observed_uplift": 0.0011885483920493567,
+          "se": 0.0003841827334079852,
+          "ci_low": 0.0004355502345697057,
+          "ci_high": 0.0019415465495290077
         },
         {
           "decile": 8,
-          "n_treatment": 237263,
-          "n_control": 42361,
-          "predicted_uplift": -0.0005781661391946133,
-          "observed_uplift": 3.6957831397042905e-05,
-          "se": 0.0001454533000725601,
-          "ci_low": -0.00024813063674517487,
-          "ci_high": 0.0003220462995392607
+          "n_treatment": 236926,
+          "n_control": 42658,
+          "predicted_uplift": 0.001481722932248186,
+          "observed_uplift": 0.0028801734272781,
+          "se": 0.0006485117690763268,
+          "ci_low": 0.0016090903598884993,
+          "ci_high": 0.0041512564946677
         },
         {
           "decile": 9,
-          "n_treatment": 237560,
-          "n_control": 42092,
-          "predicted_uplift": -0.0005416363154614871,
-          "observed_uplift": 0.00026358246019747447,
-          "se": 0.00013797155719349745,
-          "ci_low": -6.84179190178053e-06,
-          "ci_high": 0.0005340067122967295
+          "n_treatment": 237614,
+          "n_control": 42027,
+          "predicted_uplift": 0.006137613235031805,
+          "observed_uplift": 0.007542004067083524,
+          "se": 0.0011205007947041694,
+          "ci_low": 0.005345822509463352,
+          "ci_high": 0.009738185624703697
         },
         {
           "decile": 10,
-          "n_treatment": 239719,
-          "n_control": 39912,
-          "predicted_uplift": 0.075072908888464,
-          "observed_uplift": 0.039706977909479274,
-          "se": 0.0019035522901437692,
-          "ci_low": 0.03597601542079749,
-          "ci_high": 0.04343794039816106
+          "n_treatment": 241973,
+          "n_control": 37669,
+          "predicted_uplift": 0.07966120891279065,
+          "observed_uplift": 0.058215854454665816,
+          "se": 0.002309381138972789,
+          "ci_low": 0.05368946742227915,
+          "ci_high": 0.06274224148705249
         }
       ],
       "vs_reference": {
         "reference": "t_learner",
-        "diff": -0.07236578312082285,
+        "diff": 0.006561048576987448,
         "ci": [
-          -0.08242368623713879,
-          -0.06099378812442754
+          0.00043118800375026875,
+          0.012481279819646713
         ],
         "resolved": true
       }
     },
     "dr_learner": {
       "qini": 0.07492191679385776,
-      "qini_boot_mean": 0.07477538425161262,
+      "qini_boot_mean": 0.07555119234977163,
       "qini_ci": [
-        0.06297400375938013,
-        0.08760277156295225
+        0.06507341164448975,
+        0.08602358913837081
       ],
       "auuc": 0.02927990113188606,
       "uplift_at_30pct": 0.027405473272882563,
@@ -632,20 +632,20 @@
       ],
       "vs_reference": {
         "reference": "t_learner",
-        "diff": 0.00381410758050478,
+        "diff": 0.0040328673438940746,
         "ci": [
-          -0.002011611249727605,
-          0.010770147759263889
+          -0.0014367186193821372,
+          0.009767011542523879
         ],
         "resolved": false
       }
     },
     "causal_forest": {
       "qini": 0.08771917593088437,
-      "qini_boot_mean": 0.08797899224992807,
+      "qini_boot_mean": 0.0875919758039365,
       "qini_ci": [
-        0.07822075250769285,
-        0.09913409909712788
+        0.07616327582435645,
+        0.09797575152139264
       ],
       "auuc": 0.034294651194500446,
       "uplift_at_30pct": 0.02965525176927561,
@@ -653,8 +653,8 @@
       "score_mean": 0.007750861413880841,
       "score_sd": 0.01676037932210074,
       "calibration_slope": 1.0864861514493065,
-      "calibration_intercept": -0.001150136534070552,
-      "calibration_slope_se": 0.07986803007775012,
+      "calibration_intercept": -0.0011501365340705503,
+      "calibration_slope_se": 0.07986803007775013,
       "calibration_r2": 0.9585611800702818,
       "rank_correlation": 0.8424242424242423,
       "n_deciles": 10,
@@ -754,7 +754,7 @@
           "decile": 10,
           "n_treatment": 241979,
           "n_control": 37663,
-          "predicted_uplift": 0.05172549216455783,
+          "predicted_uplift": 0.051725492164557824,
           "observed_uplift": 0.05841353074064776,
           "se": 0.002461198621910045,
           "ci_low": 0.053589581441704066,
@@ -763,14 +763,13 @@
       ],
       "vs_reference": {
         "reference": "t_learner",
-        "diff": 0.017051120434970344,
+        "diff": 0.01645200426100738,
         "ci": [
-          0.010601537457365797,
-          0.02343743509884291
+          0.009581550746882243,
+          0.022505603768741524
         ],
         "resolved": true
       }
     }
-  },
-  "_provenance_note": "Produced by the run described in docs/findings.md sections 10-11. The x_learner column here uses the ORIGINAL propensity-weighted blending weight, which scored qini=-0.0016; fit_x_learner now defaults to blend=0.5, so re-running train+evaluate will change the x_learner row (expected qini ~+0.08) and nothing else. Kept as-is so the documented numbers and this artifact agree."
+  }
 }

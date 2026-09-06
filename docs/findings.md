@@ -318,6 +318,13 @@ Flipping the weight roughly doubles the Qini. `fit_x_learner` now defaults to
 `blend=0.5`, with `blend=None` restoring the textbook propensity-weighted
 behaviour so the comparison stays reproducible.
 
+**Confirmed at full scale.** Re-running the whole pipeline with `blend=0.5`
+moved the X-learner from **Qini -0.0016 to +0.0778** on the test split, and every
+other model's Qini came back bit-identical (0.08283, 0.08932, 0.07118, 0.07492,
+0.08772) - a clean control that exactly one thing changed. It now sits fourth of
+six and is *just* distinguishable from the T-learner (+0.0066, CI
+[+0.0004, +0.0125]).
+
 Worth noting the subsample was *kinder* than the full run: the same
 propensity-weighted configuration scored +0.0429 on 400k rows but −0.0016 when
 fitted on 1.5M. A bug that looks like mild underperformance at development scale
@@ -332,12 +339,12 @@ comparisons is the T-learner.
 
 | Model | Qini | 95% CI | vs T-learner | Calib. slope | Response AUC* |
 |---|---|---|---|---|---|
-| S-learner | **0.0893** | [+0.0777, +0.1010] | +0.0184, **resolved** | 0.954 | 0.867 |
-| Causal forest | 0.0877 | [+0.0782, +0.0991] | +0.0171, **resolved** | 1.086 | 0.887 |
-| Class transformation | 0.0828 | [+0.0714, +0.0929] | +0.0118, **resolved** | 0.496 | 0.726 |
-| DR-learner | 0.0749 | [+0.0630, +0.0876] | +0.0038, *overlapping* | 0.747 | 0.749 |
-| T-learner | 0.0712 | [+0.0605, +0.0814] | (reference) | 0.541 | 0.690 |
-| X-learner (propensity-weighted) | −0.0016 | [−0.0127, +0.0085] | −0.0724, **resolved** | 0.003 | 0.418 |
+| S-learner | **0.0893** | [+0.0779, +0.1005] | +0.0182, **resolved** | 0.954 | 0.867 |
+| Causal forest | 0.0877 | [+0.0762, +0.0980] | +0.0165, **resolved** | 1.086 | 0.887 |
+| Class transformation | 0.0828 | [+0.0715, +0.0942] | +0.0114, **resolved** | 0.496 | 0.726 |
+| X-learner (`blend=0.5`) | 0.0778 | [+0.0680, +0.0890] | +0.0066, **resolved** (barely) | 0.665 | 0.706 |
+| DR-learner | 0.0749 | [+0.0651, +0.0860] | +0.0040, *overlapping* | 0.747 | 0.749 |
+| T-learner | 0.0712 | [+0.0620, +0.0825] | (reference) | 0.541 | 0.690 |
 
 \* Response AUC measures who RESPONDS, not who responds BECAUSE OF treatment. It
 is reported only so it can be labelled as not the objective.
