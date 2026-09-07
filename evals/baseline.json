@@ -1,0 +1,58 @@
+{
+  "_note": "Regression floor. Update deliberately, with the reason in the commit message - never to make a red gate green.",
+  "updated_from_run_id": "2026-09-06T20:34:58.665046+00:00",
+  "git_sha": "82a1b64",
+  "dataset": {
+    "name": "criteo-uplift-v2.1",
+    "rows": 13979592,
+    "sha256": "2716e1bf0fd157a93b5bf86924d9088419dfbac2022c6cd90030220634f616dc",
+    "split": "test",
+    "n_eval": 2796413
+  },
+  "outcome": "visit",
+  "tolerance_se": 1.0,
+  "models": {
+    "class_transformation": {
+      "qini": 0.08283326395331157,
+      "qini_ci": [
+        0.0715164289641888,
+        0.0942282678688249
+      ]
+    },
+    "s_learner": {
+      "qini": 0.08932403060570301,
+      "qini_ci": [
+        0.0779200924095552,
+        0.10050651228165973
+      ]
+    },
+    "t_learner": {
+      "qini": 0.07117683727368909,
+      "qini_ci": [
+        0.06201932765661278,
+        0.08245628810766036
+      ]
+    },
+    "x_learner": {
+      "qini": 0.07779250468703254,
+      "qini_ci": [
+        0.067957602675398,
+        0.08898428792758904
+      ]
+    },
+    "dr_learner": {
+      "qini": 0.07492191679385776,
+      "qini_ci": [
+        0.06507341164448975,
+        0.08602358913837081
+      ]
+    },
+    "causal_forest": {
+      "qini": 0.08771917593088437,
+      "qini_ci": [
+        0.07616327582435645,
+        0.09797575152139264
+      ]
+    }
+  }
+}
