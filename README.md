@@ -2,6 +2,8 @@
 
 > Which users should we target, and what is the *incremental* effect?
 
+**[▶ Live dashboard](https://huggingface.co/spaces/omvyas77/uplift)** · [source](https://github.com/omvyas77/uplift)
+
 A causal platform built on the Criteo incrementality dataset — **13,979,592
 randomized records**, an 85/15 design. The models are the easy part. What this
 repo is actually about: **I had a randomized experiment, so I used it as an
@@ -146,6 +148,11 @@ make policy     # targeting policy + DR off-policy evaluation
 make api        # http://localhost:8000/docs
 make dashboard  # http://localhost:8501
 ```
+
+The dashboard is deployed to a [Hugging Face Space](https://huggingface.co/spaces/omvyas77/uplift)
+by `python scripts/deploy_space.py`, which assembles a self-contained payload
+from this repo. It runs the *same* dashboard module as `make dashboard` via a
+thin entrypoint, so the live page and the local one cannot drift.
 
 `make test` runs 68 tests on synthetic data with known ground truth — CI never
 downloads the 311 MB source file.
