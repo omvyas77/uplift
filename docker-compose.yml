@@ -1,0 +1,24 @@
+# Docker Compose, not Kubernetes. This is a batch analytics pipeline with a
+# single-user serving surface; see the README for why that is the right amount
+# of infrastructure here.
+services:
+  api:
+    build: {context: ., target: runtime}
+    ports: ["8000:8000"]
+    volumes: ["./artifacts:/app/artifacts:ro"]
+    environment:
+      UPLIFT_ARTIFACTS_DIR: /app/artifacts
+
+  dashboard:
+    build: {context: ., target: runtime}
+    command: >
+      streamlit run src/uplift/dashboard/app.py
+      --server.port 8501 --server.address 0.0.0.0 --server.headless true
+    ports: ["8501:8501"]
+    volumes:
+      - "./evals:/app/evals:ro"
+      - "./artifacts:/app/artifacts:ro"
+    environment:
+      UPLIFT_EVALS_DIR: /app/evals
+      UPLIFT_ARTIFACTS_DIR: /app/artifacts
+    depends_on: [api]

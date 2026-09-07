@@ -1,0 +1,14 @@
+data/
+.venv/
+.venv-*/
+.git/
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+evals/history/
+notebooks/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
