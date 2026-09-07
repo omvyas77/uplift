@@ -23,6 +23,7 @@ class ConfoundedSample:
     ground_truth_ate: float
     ground_truth_se: float
     strength: float
+    nonlinear: bool
     n_kept: int
     n_original: int
 
@@ -33,6 +34,7 @@ def inject_confounding(
     y: np.ndarray,
     coefs: np.ndarray | None = None,
     strength: float = 1.0,
+    nonlinear: bool = False,
     seed: int = 0,
 ) -> ConfoundedSample:
     """Create a confounded observational slice from randomized data.
@@ -59,7 +61,17 @@ def inject_confounding(
     if coefs is None:
         coefs = np.zeros(X.shape[1])
         coefs[:4] = [1.2, -0.8, 0.6, 0.9]  # a few covariates drive selection
-    e = 1.0 / (1.0 + np.exp(-strength * (Xs @ coefs)))
+    score = Xs @ coefs
+    if nonlinear:
+        # Squares and an interaction. Without these the selection logit is
+        # EXACTLY linear in X, and so is logit P(W=1 | X) in the kept sample:
+        #   logit P(W=1|X,kept) = log(p_w/(1-p_w)) + strength * (Xs @ coefs)
+        # which makes plain logistic regression the CORRECTLY SPECIFIED model,
+        # not a misspecified one. Any "doubly robust survives misspecification"
+        # demonstration built on the linear score is therefore vacuous - it was
+        # comparing a correct linear model against an over-flexible GBM.
+        score = score + 0.7 * (Xs[:, 0] ** 2 - 1.0) - 0.5 * Xs[:, 1] * Xs[:, 2]
+    e = 1.0 / (1.0 + np.exp(-strength * score))
 
     keep_prob = np.where(w == 1, e, 1.0 - e)
     keep = rng.random(n) < keep_prob
@@ -77,6 +89,7 @@ def inject_confounding(
         ground_truth_ate=truth,
         ground_truth_se=truth_se,
         strength=float(strength),
+        nonlinear=bool(nonlinear),
         n_kept=len(idx),
         n_original=int(n),
     )
