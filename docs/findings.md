@@ -476,3 +476,126 @@ and expected profit from **$191,860 to $9,443**, a 20× overstatement, because t
 break-even threshold `cost / value` was 16× too low. `Settings.value_per_outcome`
 now prices each outcome explicitly and the readout prints the conversion, the
 derived per-visit value, and the multiplier that connects them.
+
+---
+
+## 15. The bias table was wrong, and diagnosing it is the better result
+
+Sections 12–13 reported a bias table in which every adjusted estimator was badly
+biased and nearest-neighbour matching came closest to the truth. Three
+diagnostics were run against it. All three found something, and together they
+overturn that table.
+
+### 15.1 Matching was scored against the wrong answer key
+
+`matching_ate` matched each **treated** unit to its nearest control and averaged
+over the treated. That is the **ATT**, not the ATE — the function name was wrong
+as well as its use. It was being scored against the s(X)-weighted ATE.
+
+`ground_truths()` now computes both targets from the RCT:
+
+```
+s(X)   = P(kept | X)                -> the ATE target
+s_t(X) = P(kept AND treated | X)    -> the ATT target
+```
+
+| Estimator | Estimand | Estimate | vs own target | vs ATE (as published) |
+|---|---|---|---|---|
+| naive difference | ATE | −0.032148 | −705.0% | −705.0% |
+| IPW | ATE | 0.001404 | −73.6% | −73.6% |
+| AIPW | ATE | 0.002641 | −50.3% | −50.3% |
+| **matching 1-NN** | **ATT** | 0.004590 | **+43.1%** | −13.6% |
+| IPW (ATT weights) | ATT | 0.000494 | −84.6% | −90.7% |
+
+Matching's "−13.6%, nearly recovers the truth" becomes **+43.1%**, and the error
+changes sign. Its apparent win was an artifact. The two ATT estimators then
+disagree by a factor of ten, so the correction explains the artifact without
+rescuing the table.
+
+### 15.2 Overlap was the obvious suspect and is not the answer
+
+The pattern — naive sign-flipped, every adjusted estimator biased the same way,
+weight-based worst, discard-based best — is the textbook signature of positivity
+failure. It was checked rather than assumed:
+
+```
+common support gap  -0.275   (arms overlap)
+ESS/n treated        0.833
+ESS/n control        0.469
+top 1% weight share  0.065   (weights are NOT concentrated)
+clipped              7.4%    (the only bad number)
+```
+
+Degraded, not collapsed. Overlap does not explain the table.
+
+### 15.3 The cause: estimating a propensity score on randomized data
+
+At confounding strength **zero**, where nothing has been injected and overlap is
+pristine (ESS 0.92, 0.03% clipped), the naive estimator is fine at **+7.1%** —
+so the injection code is correct — while IPW is **−88%**.
+
+The propensity model's AUC for predicting treatment is **0.506**. There is no
+signal, because the treatment *is* randomized. Yet LightGBM still emits scores
+from 0.47 to 0.99 (sd 0.028). That variation is pure overfitting noise, and
+because these covariates strongly predict the **outcome** (ρ = 0.556, section 4),
+reweighting by its inverse destroys the estimate:
+
+| propensity used | IPW | AIPW |
+|---|---|---|
+| true constant (0.8501) | +0.010177 (**+3.9%**) | +0.007376 (−24.7%) |
+| estimated (LightGBM) | +0.000699 (**−92.9%**) | +0.006576 (−32.9%) |
+
+`true_propensity_in_slice()` derives the exact score in closed form —
+`P(W=1 | X, kept) = p·e / (p·e + (1−p)(1−e))` — because we built the selection.
+Having it lets the sweep separate *the method failed* from *the nuisance
+estimate failed*.
+
+### 15.4 The sweep, with both propensities
+
+Mean over two seeds, 400k sampled rows, each estimator against its own estimand:
+
+| strength | naive | IPW (est.) | **IPW (oracle)** | AIPW (oracle) | ESS ctrl | clipped |
+|---|---|---|---|---|---|---|
+| 0.00 | +7.1% | −88.1% | **+7.1%** | −17.3% | 0.917 | 0.0003 |
+| 0.25 | −197.7% | −78.2% | **+10.2%** | −26.0% | 0.863 | 0.0001 |
+| 0.50 | −422.8% | −82.2% | **+0.5%** | −35.2% | 0.684 | 0.004 |
+| 1.00 | −798.8% | −89.0% | **−4.5%** | −27.2% | 0.451 | 0.081 |
+| 1.50 | −1039.4% | −72.4% | −21.0% | −14.8% | 0.324 | 0.215 |
+| 2.00 | −1193.9% | −55.9% | −31.7% | +12.0% | 0.259 | 0.429 |
+| 3.00 | −1376.8% | −191.2% | −181.4% | −29.5% | 0.193 | 0.634 |
+| 4.00 | −1444.0% | −316.7% | −282.2% | +19.2% | 0.153 | 0.764 |
+
+**With the true propensity, IPW recovers the effect to within about 10% up to
+strength 1.0, and then degrades — and the degradation coincides with effective
+sample size falling below ~0.45 of nominal and the clipped fraction passing 8%.
+The overlap diagnostic predicts the breakdown before the bias appears. With an
+estimated propensity, IPW is 80–90% wrong at every strength, including zero.**
+
+That is the finding. It is a boundary condition rather than a success, and it is
+worth more than the clean table would have been:
+
+> Inverse-propensity weighting works here until overlap collapses, and the
+> overlap diagnostic says when. But none of that is visible if you estimate the
+> propensity score, because the treatment is randomized — the model has nothing
+> to learn and returns noise that is correlated with the outcome.
+
+### 15.5 What is still unresolved
+
+- **AIPW with the oracle propensity is still −17% to −35% in the low-strength
+  regime.** Part of this is section 3: the ground truth is the *unadjusted* RCT
+  contrast, which on this file is itself biased upward by the covariate
+  imbalance, so any covariate-adjusted estimator differs from it by roughly the
+  adjustment. That accounts for about −25% of it. The remainder is not yet
+  explained.
+- **The sweep is noise-dominated at 400k sampled rows.** Seed-to-seed swings of
+  0.15 → 0.63 were observed on the same cell. Every percentage above needs a
+  bootstrap interval before it is quoted, and at this sample size several of
+  these "biases" may not be distinguishable from zero. Treat the table as
+  directional until that is done.
+- Three of my own test premises were wrong and were corrected while doing this:
+  a constant propensity gives a support gap of exactly 0, not below it; ATT and
+  ATE do not coincide at a 50/50 design, because `s_t` is e-weighted at any
+  ratio; and comparing an estimate against the *truth's* standard error alone
+  ignores the estimator's own, which made a 15% Monte-Carlo wobble look like
+  bias. Verified against an analytic target at n = 400k: true s-weighted ATE
+  0.044197, `ground_truths()` 0.043227, IPW with the oracle 0.045044.
