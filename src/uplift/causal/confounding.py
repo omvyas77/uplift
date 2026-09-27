@@ -22,6 +22,8 @@ class ConfoundedSample:
     keep_prob: np.ndarray  # P(keep | X, W) for every original unit
     ground_truth_ate: float
     ground_truth_se: float
+    ground_truth_att: float
+    ground_truth_att_se: float
     strength: float
     nonlinear: bool
     n_kept: int
@@ -79,20 +81,70 @@ def inject_confounding(
 
     # ---- ground truth for THIS slice, computed from the full RCT ----
     p_w = w.mean()
-    s = p_w * e + (1 - p_w) * (1 - e)
-    truth, truth_se = weighted_diff_in_means(y, w, s)
+    targets = ground_truths(y, w, e, p_w)
 
     return ConfoundedSample(
         idx=idx,
         selection_score=e,
         keep_prob=keep_prob,
-        ground_truth_ate=truth,
-        ground_truth_se=truth_se,
+        ground_truth_ate=targets["ate"],
+        ground_truth_se=targets["ate_se"],
+        ground_truth_att=targets["att"],
+        ground_truth_att_se=targets["att_se"],
         strength=float(strength),
         nonlinear=bool(nonlinear),
         n_kept=len(idx),
         n_original=int(n),
     )
+
+
+def true_propensity_in_slice(e: np.ndarray, p_w: float) -> np.ndarray:
+    """The EXACT propensity inside the confounded slice - no estimation needed.
+
+    We built the selection, so we know it in closed form. A treated unit is kept
+    with probability e(X) and a control with 1 - e(X), so by Bayes:
+
+        P(W=1 | X, kept) = p_w*e / (p_w*e + (1-p_w)*(1-e))
+
+    This matters more than it looks. Fitting a flexible propensity model to data
+    where treatment is RANDOMIZED produces pure overfitting noise: on this
+    dataset at strength 0 the model's AUC for predicting treatment is 0.506 -
+    no signal - yet it emits scores from 0.47 to 0.99. Because the covariates
+    strongly predict the OUTCOME, reweighting by 1/ps then wrecks the estimate:
+    IPW returns -92.9% against truth with the estimated score and +3.9% with the
+    true constant one.
+
+    Having the oracle lets the sweep separate "the method failed" from "the
+    nuisance estimate failed", which are very different findings.
+    """
+    e = np.asarray(e, dtype=float)
+    num = p_w * e
+    return num / (num + (1.0 - p_w) * (1.0 - e))
+
+
+def ground_truths(y, w, e, p_w: float) -> dict[str, float]:
+    """BOTH target estimands for the confounded slice, computed from the RCT.
+
+    This exists because the estimators do not all target the same quantity, and
+    scoring them against one number was silently comparing apples to oranges:
+
+        s(X)   = P(kept | X)               -> reweights to the slice population
+                                              ................ the ATE target
+        s_t(X) = P(kept AND treated | X)   -> reweights to the slice's TREATED
+                                              population ...... the ATT target
+
+    IPW and AIPW estimate the ATE. Nearest-neighbour matching, which matches
+    treated units to controls and averages over the TREATED, estimates the ATT.
+    Under heterogeneous effects ATT != ATE, so matching scored against the ATE
+    is being marked against the wrong answer key.
+
+    Both are valid targets computed from the RCT, where W is independent of X.
+    """
+    s = p_w * e + (1.0 - p_w) * (1.0 - e)
+    s_t = p_w * e
+    ate, ate_se = weighted_diff_in_means(y, w, s)
+    att, att_se = weighted_diff_in_means(y, w, s_t)
+    return {"ate": ate, "ate_se": ate_se, "att": att, "att_se": att_se}
 
 
 def weighted_diff_in_means(y, w, weights):

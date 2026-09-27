@@ -25,7 +25,7 @@ from uplift.causal.estimators import (
     check_overlap,
     fit_propensity,
     ipw_ate,
-    matching_ate,
+    matching_att,
     naive_ate,
 )
 from uplift.data.synthetic import SELECTION_COEFS, make_rct
@@ -76,7 +76,7 @@ def test_every_adjusted_estimator_beats_naive():
     naive_err = abs(naive_ate(yo, wo) - truth)
     for name, est in [
         ("ipw", ipw_ate(yo, wo, ps)),
-        ("matching", matching_ate(yo, wo, ps)),
+        ("matching", matching_att(yo, wo, ps)),
         ("aipw", aipw_ate(yo, wo, Xo, ps, seed=3, n_folds=3)[0]),
     ]:
         assert abs(est - truth) < naive_err, f"{name} did not beat the naive comparison"

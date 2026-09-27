@@ -19,7 +19,7 @@ from uplift.causal.estimators import (
     dml_ate,
     fit_propensity,
     ipw_ate,
-    matching_ate,
+    matching_att,
     naive_ate,
 )
 from uplift.causal.iv import estimand_table, itt_and_cace
@@ -52,7 +52,7 @@ def bias_table(
     est: dict[str, tuple[float, float | None]] = {}
     est["naive difference-in-means"] = (naive_ate(yo, wo), None)
     est["IPW (clipped, stabilized)"] = (ipw_ate(yo, wo, ps), None)
-    est["propensity matching (1:1)"] = (matching_ate(yo, wo, ps), None)
+    est["propensity matching (1:1)"] = (matching_att(yo, wo, ps), None)
     dr, dr_se = aipw_ate(yo, wo, Xo, ps, seed=seed)
     est["AIPW / doubly robust"] = (dr, dr_se)
     # A second doubly-robust route with a different final stage, and notably not

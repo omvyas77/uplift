@@ -104,8 +104,17 @@ def aipw_ate(
     return float(scores.mean()), float(scores.std(ddof=1) / np.sqrt(len(scores)))
 
 
-def matching_ate(y, w, ps, k: int = 1, caliper: float | None = 0.05) -> float:
+def matching_att(y, w, ps, k: int = 1, caliper: float | None = 0.05) -> float:
     """1:k nearest-neighbour matching on the propensity score, with a caliper.
+
+    RETURNS THE ATT, NOT THE ATE - hence the name. It matches each TREATED unit
+    to its nearest control and averages the difference over the treated, so the
+    population it describes is the treated one. The caliper drops treated units
+    with no comparable control, which narrows that population further.
+
+    This was previously called `matching_att` and scored against the ATE ground
+    truth. Under heterogeneous effects ATT != ATE, so it was being marked
+    against the wrong answer key - see `ground_truths` in confounding.py.
 
     Matching on the SCORE rather than on X is the standard reduction; the
     caliper is what stops a treated unit with no comparable control from being
@@ -123,6 +132,25 @@ def matching_ate(y, w, ps, k: int = 1, caliper: float | None = 0.05) -> float:
     if len(treated) == 0:
         return float("nan")
     return float(y[treated].mean() - y[control[ind]].mean(axis=1).mean())
+
+
+def ipw_att(y, w, ps, clip: tuple[float, float] = (0.02, 0.98)) -> float:
+    """IPW targeting the ATT, as a cross-check on matching.
+
+    ATT weights are 1 for treated units and ps/(1-ps) for controls - the odds of
+    treatment, which reweights the control arm to look like the treated one.
+
+    If this agrees with `matching_att` and with the ATT ground truth, then the
+    estimand mismatch is confirmed as the explanation for matching's apparent
+    win, rather than matching being genuinely better.
+    """
+    y = np.asarray(y, dtype=float)
+    ps = np.clip(np.asarray(ps, dtype=float), *clip)
+    odds = ps / (1.0 - ps)
+    m1 = y[w == 1].mean()
+    wc = odds[w == 0]
+    m0 = float(np.sum(wc * y[w == 0]) / np.sum(wc))
+    return float(m1 - m0)
 
 
 def dml_ate(y, w, X, seed: int = 0, cv: int = 3) -> tuple[float, float]:
