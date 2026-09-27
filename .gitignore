@@ -9,7 +9,13 @@ __pycache__/
 htmlcov/
 
 # Data: NEVER commit. Ship the download script instead.
-data/
+#
+# These patterns are ANCHORED with a leading slash so they match only the
+# top-level directories they mean. An unanchored `data/` matches a directory of
+# that name at ANY depth - which silently excluded the entire src/uplift/data/
+# package from the repo and made a fresh clone unrunnable.
+/data/
+/artifacts/
 *.duckdb
 *.duckdb.wal
 *.csv
@@ -18,16 +24,14 @@ data/
 !dbt/seeds/criteo_sample.csv
 
 # dbt
-dbt/target/
-dbt/dbt_packages/
-dbt/logs/
+/dbt/target/
+/dbt/dbt_packages/
+/dbt/logs/
 .user.yml
 
-# Artifacts
-artifacts/
-models/*.pkl
-models/*.joblib
-!models/.gitkeep
+/models/*.pkl
+/models/*.joblib
+!/models/.gitkeep
 
 .env
 .DS_Store
