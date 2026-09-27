@@ -13,7 +13,16 @@ jobs:
       # serve and orchestrate are NOT optional here. Without them the API
       # tests cannot even be collected and the dashboard tests silently SKIP,
       # so those modules would be linted but never actually exercised in CI.
-      - run: uv sync --frozen --extra causal --extra serve --extra orchestrate --extra dev
+      - run: uv sync --frozen --extra causal --extra dbt --extra serve --extra orchestrate --extra dev
+      - name: build the dbt manifest
+        # Dagster's DbtProject needs dbt/target/manifest.json, which is
+        # correctly gitignored. `dbt parse` regenerates it in seconds and does
+        # not touch a database, so the orchestration tests exercise the real
+        # asset graph instead of skipping.
+        run: |
+          cd dbt
+          uv run dbt deps
+          uv run dbt parse --target ci
       - name: ruff
         run: |
           uv run ruff check src tests orchestration scripts

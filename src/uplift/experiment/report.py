@@ -14,6 +14,7 @@ from uplift.experiment.ate import ate_difference_in_means, ate_from_adjusted, at
 from uplift.experiment.balance import balance_from_arrays
 from uplift.experiment.cuped import build_cupac_covariate, evaluate_cuped
 from uplift.experiment.power import allocation_table, mde
+from uplift.experiment.sequential import peeking_simulation, peeking_simulation_corrected
 from uplift.experiment.srm import check_srm, detectable_deviation, simulate_srm_calibration
 from uplift.logging import get_logger
 
@@ -27,6 +28,8 @@ def experiment_report(
     lin_sample: int = 2_000_000,
     cupac_sample: int = 2_000_000,
     run_calibration: bool = True,
+    run_peeking: bool = True,
+    n_peek_sims: int = 400,
     write: bool = True,
 ) -> dict[str, Any]:
     """Run the full experiment analysis and print the readout.
@@ -90,8 +93,35 @@ def experiment_report(
     out["cuped"] = cuped.to_dict() | {"n_used": len(cidx)}
     out["ate"]["cupac"] = cupac_ate.to_dict() | {"n_used": len(cidx)}
 
-    # ---------------- power ----------------
     p0 = float(y[w == 0].mean())
+    p0_for_peek = p0
+
+    # ---------------- peeking ----------------
+    # Criteo has no time column, so this is a SIMULATION on data generated under
+    # a known null, not monitoring of the real experiment. Labelled as such here
+    # and in the printed readout.
+    if run_peeking:
+        naive_peek = peeking_simulation(
+            n_peeks=10,
+            n_per_peek=5000,
+            p=p0_for_peek,
+            n_sims=n_peek_sims,
+            seed=settings.random_seed,
+        )
+        obf_peek = peeking_simulation_corrected(
+            n_peeks=10,
+            n_per_peek=5000,
+            p=p0_for_peek,
+            n_sims=n_peek_sims,
+            seed=settings.random_seed,
+        )
+        out["peeking"] = {
+            "naive": naive_peek,
+            "obrien_fleming": obf_peek,
+            "note": "simulated under a known null; Criteo has no time dimension",
+        }
+
+    # ---------------- power ----------------
     design = mde(n, p0, settings.designed_treatment_ratio)
     out["power"] = design.to_dict()
     out["allocation_table"] = allocation_table(n, p0)
@@ -121,7 +151,15 @@ def experiment_report(
     for r in results:
         print("  " + r.summary())
     print(f"\nVariance red. CUPAC {cuped.summary()}")
-    print(f"Design        {design.summary()}")
+    if run_peeking:
+        print(
+            f"\nPeeking (SIM) 10 looks at alpha=0.05 -> false-positive rate "
+            f"{out['peeking']['naive']['actual_false_positive_rate']:.3f}; "
+            f"O'Brien-Fleming -> "
+            f"{out['peeking']['obrien_fleming']['actual_false_positive_rate']:.3f}"
+        )
+        print("              simulated under a known null - this dataset has no time column")
+    print(f"\nDesign        {design.summary()}")
     eff = design.allocation_efficiency
     print(
         f"              -> the {settings.designed_treatment_ratio:.0%}/"

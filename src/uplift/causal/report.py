@@ -16,6 +16,7 @@ from uplift.causal.confounding import inject_confounding
 from uplift.causal.estimators import (
     aipw_ate,
     check_overlap,
+    dml_ate,
     fit_propensity,
     ipw_ate,
     matching_ate,
@@ -54,6 +55,14 @@ def bias_table(
     est["propensity matching (1:1)"] = (matching_ate(yo, wo, ps), None)
     dr, dr_se = aipw_ate(yo, wo, Xo, ps, seed=seed)
     est["AIPW / doubly robust"] = (dr, dr_se)
+    # A second doubly-robust route with a different final stage, and notably not
+    # our own implementation - if both land in the same place, the result is not
+    # an artefact of how we wrote AIPW.
+    try:
+        dml, dml_se = dml_ate(yo, wo, Xo, seed=seed)
+        est["DML (EconML LinearDML)"] = (dml, dml_se)
+    except Exception as exc:
+        log.warning("dml_failed", error=str(exc))
 
     rows = [
         {

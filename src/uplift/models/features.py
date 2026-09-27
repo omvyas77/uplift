@@ -16,8 +16,6 @@ the only one of the two with enough base rate to rank on.
 
 from __future__ import annotations
 
-import numpy as np
-
 FEATURES: list[str] = [f"f{i}" for i in range(12)]
 
 
@@ -33,12 +31,3 @@ def check_no_leakage(columns: list[str]) -> None:
             f"post-treatment or outcome columns in the feature matrix: {sorted(leaked)}. "
             "Conditioning on these breaks randomization - see docs/findings.md."
         )
-
-
-def summarize(X: np.ndarray) -> dict[str, float]:
-    return {
-        "n": int(X.shape[0]),
-        "n_features": int(X.shape[1]),
-        "n_nan": int(np.isnan(X).sum()),
-        "n_inf": int(np.isinf(X).sum()),
-    }

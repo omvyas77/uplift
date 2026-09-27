@@ -7,19 +7,9 @@ import pandas as pd
 
 from uplift.config import settings
 from uplift.data.ingest import connect
+from uplift.models.features import check_no_leakage
 
 FEATURES = [f"f{i}" for i in range(12)]
-
-
-def table_exists(con, name: str) -> bool:
-    return bool(
-        con.execute("SELECT count(*) FROM duckdb_tables() WHERE table_name = ?", [name]).fetchone()[
-            0
-        ]
-        or con.execute(
-            "SELECT count(*) FROM duckdb_views() WHERE view_name = ?", [name]
-        ).fetchone()[0]
-    )
 
 
 def load_split(
@@ -32,9 +22,14 @@ def load_split(
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Load one split as (X, w, y).
 
-    NOTE: `exposure` is deliberately NOT returned as a feature. It is a
-    post-treatment variable and using it as a feature would break
-    identification. `load_iv_split` returns it, for the IV module only.
+    `exposure` is deliberately NOT returned as a feature. It is a post-treatment
+    variable and using it as a feature would break identification;
+    `load_iv_split` is the one function that returns it, for the IV module.
+
+    That promise is now ENFORCED rather than merely documented - every feature
+    matrix leaving this function is checked by `check_no_leakage`. The guard
+    existed for weeks without a single caller, which is the failure mode it was
+    written to prevent.
     """
     close = con is None
     con = con or connect(read_only=True)
@@ -47,6 +42,7 @@ def load_split(
     finally:
         if close:
             con.close()
+    check_no_leakage(FEATURES)
     X = df[FEATURES].to_numpy(dtype=np.float32)
     w = df["treatment"].to_numpy(dtype=np.int8)
     y = df["y"].to_numpy(dtype=np.int8)
