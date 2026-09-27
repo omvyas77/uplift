@@ -1,0 +1,52 @@
+{
+  "reps": 1,
+  "sample": 80000,
+  "share": 0.85,
+  "srm_flagged": 0,
+  "naive_ci_coverage": 1.0,
+  "max_abs_smd_mean": 0.032092893139625524,
+  "summary": {
+    "ate_naive": {
+      "mean": -0.006169599506335617,
+      "sd": NaN,
+      "t_vs_null": Infinity,
+      "is_null": false
+    },
+    "ate_lin": {
+      "mean": -0.005981073293740948,
+      "sd": NaN,
+      "t_vs_null": Infinity,
+      "is_null": false
+    },
+    "ipw_oracle": {
+      "mean": -0.006169599506335617,
+      "sd": NaN,
+      "t_vs_null": Infinity,
+      "is_null": false
+    },
+    "ipw_estimated": {
+      "mean": -0.014057576207532764,
+      "sd": NaN,
+      "t_vs_null": Infinity,
+      "is_null": false
+    },
+    "aipw_oracle": {
+      "mean": -0.006120450878470916,
+      "sd": NaN,
+      "t_vs_null": Infinity,
+      "is_null": false
+    },
+    "aipw_estimated": {
+      "mean": -0.018422523612832427,
+      "sd": NaN,
+      "t_vs_null": Infinity,
+      "is_null": false
+    },
+    "qini": {
+      "mean": 0.012735556304409394,
+      "sd": NaN,
+      "t_vs_null": Infinity,
+      "is_null": false
+    }
+  }
+}

@@ -12,6 +12,30 @@ from uplift.models.features import check_no_leakage
 FEATURES = [f"f{i}" for i in range(12)]
 
 
+def _sampled_query(cols: str, table: str, split: str | None, sample: int | None, seed: int) -> str:
+    """Build a SELECT that filters BEFORE sampling.
+
+    DuckDB applies `USING SAMPLE` to the table, not to the filtered result, when
+    the clause trails a WHERE in the same SELECT. So
+
+        SELECT ... FROM units WHERE split = 'train' USING SAMPLE 100000 ROWS
+
+    samples 100,000 rows from all 14M and THEN keeps the ~60% that are train,
+    silently returning 59,758 rows instead of 100,000. Asking for a sample of
+    the control arm returned 15% of what was requested - which is how this was
+    found, while building the A/A test.
+
+    Wrapping the filter in a subquery makes the sample apply to the filtered
+    set, which is what every caller means.
+    """
+    inner = f"SELECT {cols} FROM {table}"
+    if split:
+        inner += f" WHERE split = '{split}'"
+    if not sample:
+        return inner
+    return f"SELECT * FROM ({inner}) USING SAMPLE {sample} ROWS (reservoir, {seed})"
+
+
 def load_split(
     split: str | None = None,
     outcome: str = "visit",
@@ -34,10 +58,14 @@ def load_split(
     close = con is None
     con = con or connect(read_only=True)
     try:
-        where = f"WHERE split = '{split}'" if split else ""
-        samp = f"USING SAMPLE {sample} ROWS (reservoir, {seed})" if sample else ""
         df = con.execute(
-            f"SELECT {', '.join(FEATURES)}, treatment, {outcome} AS y FROM {columns} {where} {samp}"
+            _sampled_query(
+                f"{', '.join(FEATURES)}, treatment, {outcome} AS y",
+                columns,
+                split,
+                sample,
+                seed,
+            )
         ).df()
     finally:
         if close:
@@ -60,11 +88,14 @@ def load_iv_split(
     close = con is None
     con = con or connect(read_only=True)
     try:
-        where = f"WHERE split = '{split}'" if split else ""
-        samp = f"USING SAMPLE {sample} ROWS (reservoir, {seed})" if sample else ""
         df = con.execute(
-            f"SELECT {', '.join(FEATURES)}, treatment, exposure, {outcome} AS y "
-            f"FROM units {where} {samp}"
+            _sampled_query(
+                f"{', '.join(FEATURES)}, treatment, exposure, {outcome} AS y",
+                "units",
+                split,
+                sample,
+                seed,
+            )
         ).df()
     finally:
         if close:
