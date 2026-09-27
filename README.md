@@ -154,7 +154,7 @@ by `python scripts/deploy_space.py`, which assembles a self-contained payload
 from this repo. It runs the *same* dashboard module as `make dashboard` via a
 thin entrypoint, so the live page and the local one cannot drift.
 
-`make test` runs 153 tests on synthetic data with known ground truth — CI never
+`make test` runs 155 tests on synthetic data with known ground truth — CI never
 downloads the 311 MB source file. (The count is pinned by a test, so it cannot
 drift from reality.)
 

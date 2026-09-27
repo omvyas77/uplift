@@ -599,3 +599,103 @@ worth more than the clean table would have been:
   ignores the estimator's own, which made a 15% Monte-Carlo wobble look like
   bias. Verified against an analytic target at n = 400k: true s-weighted ATE
   0.044197, `ground_truths()` 0.043227, IPW with the oracle 0.045044.
+
+---
+
+## 16. The chapter resolves: it was the answer key, and one real bug
+
+Section 15 diagnosed the bias table but left two things unexplained. Both are now
+settled, and the resolution is simpler than the diagnosis.
+
+### 16.1 The implementation was not the problem
+
+In-sample propensities or unstabilized Horvitz–Thompson weights would each
+produce the observed signature on their own, and both are one-line bugs. Checked
+first, before concluding anything:
+
+| check | result |
+|---|---|
+| propensity AUC, out-of-fold | 0.504 (no signal) |
+| propensity AUC, in-sample | 0.640 (memorises) |
+| ⇒ cross-fitting is genuinely out-of-fold | ✅ |
+| `stabilized=True` equals the Hájek self-normalized form | ✅ |
+| `stabilized=True` differs from Horvitz–Thompson | ✅ |
+
+Worth noting: cross-fitting removes the *memorisation*, but the out-of-fold
+scores still have sd **0.031**. It kills the bias in the score, not the variance.
+
+### 16.2 The −88% is bias, not noise: |t| = 43
+
+Twenty seeds at strength zero, where there is no confounding at all, so the
+spread is the estimator's own sampling distribution:
+
+| estimator | mean | SD | mean bias | SD of bias | **\|t\|** |
+|---|---|---|---|---|---|
+| naive | 0.009718 | 0.000925 | −0.8% | 9.4% | 0.4 |
+| **IPW (oracle ps)** | 0.009718 | 0.000925 | **−0.8%** | 9.4% | **0.4** |
+| **IPW (estimated ps)** | 0.000855 | 0.000928 | **−91.3%** | 9.5% | **43.1** |
+| AIPW (oracle ps) | 0.007416 | 0.000686 | −24.3% | 7.0% | 15.5 |
+| AIPW (estimated ps) | 0.006159 | 0.001034 | −37.1% | 10.6% | 15.7 |
+
+IPW with the true propensity is **indistinguishable from unbiased** and exactly
+equals naive — which is what must happen when the true propensity is constant.
+With an estimated one it is −91.3% at |t| = 43.1.
+
+**The noise floor is ±9.4%.** Every single-seed figure in section 15 carries that
+much uncertainty, which is why the sweep there is directional only. −91% is ten
+times outside it.
+
+### 16.3 The answer key was wrong
+
+AIPW's stubborn −24.3% was not estimator bias. It was the key.
+
+The ground truth was the s-weighted **difference in means**, which inherits this
+file's covariate imbalance (section 3). AIPW is a covariate-*adjusted*
+estimator, so it was being scored against an unadjusted target and charged for
+the adjustment. Scoring like with like — an adjusted estimator against an
+s-weighted **Lin-adjusted** key — removes the mismatch:
+
+**At strength 0, real data:**
+
+```
+key: s-weighted difference in means   0.009798
+key: s-weighted Lin-adjusted          0.007412    (-24.3%)
+```
+
+| estimator | vs DIM key | vs **adjusted** key |
+|---|---|---|
+| naive | **+3.9%** | +37.3% |
+| IPW (oracle ps) | **+3.9%** | +37.3% |
+| **AIPW (oracle ps)** | −24.8% | **−0.7%** |
+| AIPW (estimated ps) | −32.9% | −11.3% |
+| IPW (estimated ps) | −92.9% | −90.6% |
+
+**AIPW recovers the truth to −0.7% once it is scored against the target it
+actually estimates.** The unadjusted estimators land at +3.9% against the
+unadjusted key. Both families are right; scoring them across the diagonal is
+what manufactured a ±25–39% "bias table".
+
+The control matters: on synthetic data, where covariates are balanced by
+construction, the two keys agree to **0.1%**. The correction is a no-op when
+there is nothing to adjust for, which is what makes it a fix rather than a
+second artifact.
+
+### 16.4 What actually survives
+
+Of the original chapter, exactly one finding stands, and it is a good one:
+
+> **Estimating a propensity score on randomized data destroys the estimate.**
+> The model has nothing to learn — AUC 0.504 — but still emits scores with sd
+> 0.031, and because these covariates strongly predict the outcome (ρ = 0.556),
+> reweighting by that noise biases IPW by −91% with |t| = 43. Use the design
+> probability you already know.
+
+Everything else in sections 12–13 was one of two artifacts: matching scored
+against the ATE when it estimates the ATT (section 15.1), or adjusted
+estimators scored against an unadjusted key (this section).
+
+**Sections 12 and 13 are superseded and should be read only as a record of what
+the table looked like before it was diagnosed.** The corrected statement is:
+with the correct estimand, the correct key, and the known design propensity,
+both estimator families recover the truth to within a few percent — and the one
+genuine failure is one that most practitioners would never think to check.

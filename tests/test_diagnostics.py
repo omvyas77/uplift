@@ -160,3 +160,45 @@ def test_ground_truths_returns_both_targets_with_standard_errors():
     assert out["ate_se"] > 0 and out["att_se"] > 0
     # at e = 0.5 the two weightings coincide
     assert out["ate"] == pytest.approx(out["att"], abs=1e-9)
+
+
+# ------------------------------------------------------- the corrected key
+def test_adjusted_and_unadjusted_keys_agree_when_covariates_are_balanced():
+    """The control for the key correction.
+
+    Adjusting the answer key must be a no-op when there is nothing to adjust
+    for. Synthetic covariates are balanced by construction, so the s-weighted
+    Lin-adjusted target and the s-weighted difference in means must coincide.
+    If they diverged here, the correction would be introducing an artifact
+    rather than removing one.
+    """
+    X, w, y, _ = make_rct(n=300_000, treatment_share=0.85, seed=7)
+    cs = inject_confounding(X, w, y, strength=1.0, seed=8)
+    rel_gap = abs(cs.ground_truth_ate_adj / cs.ground_truth_ate - 1.0)
+    assert rel_gap < 0.05, (
+        f"the two keys differ by {100 * rel_gap:.1f}% on BALANCED data; "
+        "the adjustment should be a no-op here"
+    )
+
+
+@pytest.mark.stat
+def test_an_adjusted_estimator_matches_the_adjusted_key():
+    """Score like with like.
+
+    An adjusted estimator (AIPW) targets the covariate-adjusted effect, so it
+    belongs against the adjusted key; an unadjusted one (naive) belongs against
+    the unadjusted key. On synthetic balanced data both hold simultaneously,
+    which is what makes the cross-scoring artifact on the real file diagnosable
+    rather than just surprising.
+    """
+    from uplift.causal.estimators import aipw_ate
+
+    X, w, y, _ = make_rct(n=300_000, treatment_share=0.85, seed=9)
+    cs = inject_confounding(X, w, y, strength=1.0, seed=10)
+    Xo, wo, yo = X[cs.idx], w[cs.idx], y[cs.idx]
+    ps_true = true_propensity_in_slice(cs.selection_score[cs.idx], float(w.mean()))
+
+    dr, _ = aipw_ate(yo, wo, Xo, ps_true, seed=10)
+    assert abs(dr / cs.ground_truth_ate_adj - 1.0) < 0.25
+    assert abs(naive_like := (yo[wo == 1].mean() - yo[wo == 0].mean())) > 0
+    assert abs(naive_like / cs.ground_truth_ate - 1.0) < 0.25

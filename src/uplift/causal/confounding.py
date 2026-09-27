@@ -24,6 +24,8 @@ class ConfoundedSample:
     ground_truth_se: float
     ground_truth_att: float
     ground_truth_att_se: float
+    ground_truth_ate_adj: float
+    ground_truth_att_adj: float
     strength: float
     nonlinear: bool
     n_kept: int
@@ -81,7 +83,7 @@ def inject_confounding(
 
     # ---- ground truth for THIS slice, computed from the full RCT ----
     p_w = w.mean()
-    targets = ground_truths(y, w, e, p_w)
+    targets = ground_truths(y, w, e, p_w, X=X)
 
     return ConfoundedSample(
         idx=idx,
@@ -91,6 +93,8 @@ def inject_confounding(
         ground_truth_se=targets["ate_se"],
         ground_truth_att=targets["att"],
         ground_truth_att_se=targets["att_se"],
+        ground_truth_ate_adj=targets.get("ate_adj", float("nan")),
+        ground_truth_att_adj=targets.get("att_adj", float("nan")),
         strength=float(strength),
         nonlinear=bool(nonlinear),
         n_kept=len(idx),
@@ -122,7 +126,7 @@ def true_propensity_in_slice(e: np.ndarray, p_w: float) -> np.ndarray:
     return num / (num + (1.0 - p_w) * (1.0 - e))
 
 
-def ground_truths(y, w, e, p_w: float) -> dict[str, float]:
+def ground_truths(y, w, e, p_w: float, X=None) -> dict[str, float]:
     """BOTH target estimands for the confounded slice, computed from the RCT.
 
     This exists because the estimators do not all target the same quantity, and
@@ -144,7 +148,39 @@ def ground_truths(y, w, e, p_w: float) -> dict[str, float]:
     s_t = p_w * e
     ate, ate_se = weighted_diff_in_means(y, w, s)
     att, att_se = weighted_diff_in_means(y, w, s_t)
-    return {"ate": ate, "ate_se": ate_se, "att": att, "att_se": att_se}
+    out = {"ate": ate, "ate_se": ate_se, "att": att, "att_se": att_se}
+    if X is not None:
+        # COVARIATE-ADJUSTED targets. See `weighted_lin_effect` for why the
+        # unadjusted contrast is the wrong answer key on THIS dataset.
+        adj, adj_se = weighted_lin_effect(y, w, X, s)
+        adj_t, adj_t_se = weighted_lin_effect(y, w, X, s_t)
+        out |= {"ate_adj": adj, "ate_adj_se": adj_se, "att_adj": adj_t, "att_adj_se": adj_t_se}
+    return out
+
+
+def weighted_lin_effect(y, w, X, weights) -> tuple[float, float]:
+    """s-weighted Lin regression-adjusted effect - the CORRECTED answer key.
+
+    The bias table originally scored every estimator against the s-weighted
+    DIFFERENCE IN MEANS. That inherits this file's covariate imbalance
+    (docs/findings.md section 3): the unadjusted contrast is biased upward by
+    roughly 25%, so a covariate-adjusted estimator like AIPW differs from it by
+    about the adjustment - and that gap was being reported as estimator bias.
+
+    Adjusting the KEY the same way the estimators adjust removes that mismatch:
+    both sides then target the same covariate-adjusted quantity. Lin's estimator
+    (interacted, HC1) is used because it is the adjusted contrast that stays
+    valid under effect heterogeneity.
+    """
+    import statsmodels.api as sm
+
+    y = np.asarray(y, dtype=float)
+    X = np.asarray(X, dtype=float)
+    wt = np.asarray(weights, dtype=float)
+    Xc = X - np.average(X, axis=0, weights=wt)
+    design = np.column_stack([np.ones(len(y)), w, Xc, w[:, None] * Xc])
+    fit = sm.WLS(y, design, weights=wt).fit(cov_type="HC1")
+    return float(fit.params[1]), float(fit.bse[1])
 
 
 def weighted_diff_in_means(y, w, weights):
