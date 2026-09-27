@@ -83,3 +83,33 @@ models:
         tests: [unique, not_null]
       - name: n_units
         tests: [not_null]
+
+  - name: mart_metrics
+    description: >
+      The metrics layer: visit_rate (north star), conversion_rate (guardrail)
+      and compliance_rate (the IV first stage), defined once and computed from
+      one model. See the model's header for why this is a model rather than a
+      dbt semantic layer - MetricFlow requires a time spine and this dataset has
+      no time dimension.
+    columns:
+      - name: split
+        tests: [unique, not_null]
+      - name: visit_rate
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 1.0
+      - name: conversion_rate
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 1.0
+      - name: compliance_rate
+        description: P(exposed | treated). CACE = ITT / this.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 1.0

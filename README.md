@@ -167,7 +167,9 @@ drift from reality.)
 - **Causal identification validated against randomized ground truth**
 - **ITT vs CACE via instrumental variables**, and why `exposure` breaks a naive
   analysis
-- **Analytics engineering** — dbt staging→marts, 46 data tests, a metrics layer
+- **Analytics engineering** — dbt staging→marts, 45 data tests, and a
+  [metrics layer](docs/metric_definitions.md) defining the north star, the
+  guardrail and the IV first stage in one place
 - **Ops** — Dagster assets with blocking SRM/balance checks, Docker Compose, a CI
   regression gate that fails on a real regression but tolerates noise
 
