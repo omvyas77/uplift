@@ -61,6 +61,8 @@ dev = [
     # starlette's TestClient needs httpx; without it tests/test_api.py cannot
     # even be collected.
     "httpx>=0.27",
+    # tests/test_workflows.py parses the GitHub Actions files
+    "pyyaml>=6.0",
 ]
 
 [project.scripts]

@@ -3055,6 +3055,7 @@ dev = [
     { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "pyyaml" },
     { name = "ruff" },
     { name = "types-requests" },
 ]
@@ -3101,6 +3102,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.4" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
+    { name = "pyyaml", marker = "extra == 'dev'", specifier = ">=6.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6" },
     { name = "scikit-learn", specifier = ">=1.5" },
     { name = "scikit-uplift", marker = "extra == 'causal'", specifier = ">=0.5.1" },

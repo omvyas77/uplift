@@ -19,4 +19,9 @@ jobs:
       # The `ci` target is in-memory DuckDB over the committed 50k-row seed, so
       # the whole project builds in seconds with no download. The balance
       # tolerances are loosened because 50k rows cannot support the tight ones.
-      - run: uv run dbt build --target ci --vars '{"smd_tolerance": 0.05, "treatment_ratio_tolerance": 0.01, "split_tolerance": 0.02}'
+      # Block scalar, not a plain one. A plain YAML scalar cannot contain
+      # ": " and this --vars payload is full of it, which made the whole
+      # workflow file unparseable - it failed in 0s on every push and so the
+      # dbt project was never once built in CI.
+      - run: |
+          uv run dbt build --target ci --vars '{"smd_tolerance": 0.05, "treatment_ratio_tolerance": 0.01, "split_tolerance": 0.02}'
