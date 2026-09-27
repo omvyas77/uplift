@@ -174,6 +174,6 @@ def evaluate_and_write(
     if write:
         settings.ensure_dirs()
         p = settings.evals_dir / "results.json"
-        p.write_text(json.dumps(out, indent=2, default=float))
+        p.write_text(json.dumps(out, indent=2, default=float) + "\n")
         log.info("wrote", path=str(p))
     return out

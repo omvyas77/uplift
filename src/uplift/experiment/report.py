@@ -172,6 +172,6 @@ def experiment_report(
         # Per-outcome filename. A single experiment.json meant that running the
         # secondary outcome silently destroyed the primary one's readout.
         path = settings.evals_dir / f"experiment_{outcome}.json"
-        path.write_text(json.dumps(out, indent=2, default=float))
+        path.write_text(json.dumps(out, indent=2, default=float) + "\n")
         log.info("wrote", path=str(path))
     return out

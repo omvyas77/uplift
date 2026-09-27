@@ -93,7 +93,7 @@ def run(results_path: Path, baseline_path: Path, update: bool = False) -> int:
     results = json.loads(results_path.read_text())
 
     if update:
-        baseline_path.write_text(json.dumps(build_baseline(results), indent=2))
+        baseline_path.write_text(json.dumps(build_baseline(results), indent=2) + "\n")
         print(f"baseline written to {baseline_path} from run {results.get('run_id')}")
         return 0
 

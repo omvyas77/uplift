@@ -1,6 +1,8 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.14
+    # Must match the ruff pinned in uv.lock, or pre-commit and CI lint with
+    # two different linters and disagree.
+    rev: v0.16.6
     hooks:
       - id: ruff
         args: [--fix]

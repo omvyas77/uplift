@@ -223,6 +223,6 @@ def causal_report(
     if write:
         settings.ensure_dirs()
         path = settings.evals_dir / "causal.json"
-        path.write_text(json.dumps(out, indent=2, default=float))
+        path.write_text(json.dumps(out, indent=2, default=float) + "\n")
         log.info("wrote", path=str(path))
     return out
