@@ -36,3 +36,9 @@ htmlcov/
 .env
 .DS_Store
 .ipynb_checkpoints/
+
+# Personal working notes, not project artifacts. These are the PLAN the project
+# was built from, plus study material written around it. A reader of the repo
+# should see the work, not the recipe. Kept on disk, out of the repo.
+/UPLIFT_BUILD_GUIDE.md
+/AB_TESTING_STUDY_GUIDE.md
