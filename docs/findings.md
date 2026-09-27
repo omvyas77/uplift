@@ -699,3 +699,98 @@ the table looked like before it was diagnosed.** The corrected statement is:
 with the correct estimand, the correct key, and the known design propensity,
 both estimator families recover the truth to within a few percent — and the one
 genuine failure is one that most practitioners would never think to check.
+
+---
+
+## 17. The A/A test: the pipeline is clean, and IPW is not
+
+Split the control arm in half, label one half "treated" at the real 85/15 ratio,
+and run everything. There is no effect to find, so any non-null result is a bug.
+Twenty repetitions give the sampling distribution of every estimator under a
+true null.
+
+This is the one test immune to the answer-key problem of section 16: under a
+true null the effect is zero for the **adjusted** and the **unadjusted**
+estimand alike, so there is no question of which target to score against.
+
+400,000 control-arm units, 20 reps:
+
+| quantity | mean | SD | \|t\| vs 0 | verdict |
+|---|---|---|---|---|
+| naive difference | −0.000082 | 0.001099 | 0.3 | null ✅ |
+| Lin regression-adjusted | −0.000270 | 0.001350 | 0.9 | null ✅ |
+| IPW (oracle ps) | −0.000082 | 0.001099 | 0.3 | null ✅ |
+| **IPW (estimated ps)** | **−0.002890** | 0.001128 | **11.5** | **NOT NULL** ❌ |
+| AIPW (oracle ps) | −0.000017 | 0.001058 | 0.1 | null ✅ |
+| AIPW (estimated ps) | −0.000198 | 0.001079 | 0.8 | null ✅ |
+| **Qini** | **+0.000422** | 0.013364 | 0.1 | null ✅ |
+
+Plus: SRM flagged in 0/20, the naive CI covered zero in 18/20 (nominal 95%), and
+max \|SMD\| averaged 0.0076.
+
+### 17.1 The pipeline is clean
+
+Every stage returns zero when zero is the answer. No leakage, no split
+contamination, no label misalignment, no metric bug. That is the thing this test
+exists to rule out, and it is ruled out.
+
+### 17.2 The reported Qini is not an artifact
+
+**Qini under a true null is +0.0004, indistinguishable from zero.** The measured
+0.0893 on the test split is therefore real signal, not pipeline residue.
+
+The SD of 0.0134 at 160,000 test rows is the Qini **noise floor**, and it
+scales as 1/√n. On the real 2,796,413-row test split that is roughly
+
+```
+0.0134 × √(160,000 / 2,796,413) ≈ 0.0032
+```
+
+so 0.0893 sits about 28 standard errors clear of the floor. The uplift models
+are measuring something. Whether they can be *ranked against each other* is a
+separate question, answered by the paired bootstrap, and the answer there was
+partly no.
+
+### 17.3 Independent confirmation of the covariate imbalance
+
+The A/A split uses the **same features** with a **genuinely random** assignment.
+Its max \|SMD\| is **0.0076**. The real assignment's is **0.0488** — six times
+larger, on identical code.
+
+That is section 3 confirmed by a third method, and it disposes of the remaining
+alternative explanation: the imbalance is not an artifact of how `balance.py`
+computes SMDs, because the same function on the same columns returns a clean
+number when the assignment really is random.
+
+### 17.4 IPW with an estimated propensity fails, unambiguously
+
+`ipw_estimated` returns **−0.00289 at \|t\| = 11.5** when the true effect is
+exactly zero. No estimand ambiguity, no contaminated key, no confounding to
+adjust for — the propensity model has nothing to learn and the answer is zero.
+It still gets it wrong.
+
+Note which estimators survive: **AIPW with the same estimated propensity is
+fine** (\|t\| = 0.8). That is double robustness doing its job — the outcome
+model carries the estimate when the propensity model is noise. The failure is
+specific to leaning on the propensity alone.
+
+So the surviving finding from sections 15–16 is now established three ways:
+a 20-seed null calibration (\|t\| = 43), an oracle-versus-estimated comparison,
+and an A/A test that cannot be argued with.
+
+> **Do not estimate a propensity score on randomized data.** The model has
+> nothing to learn — AUC 0.504 — but still emits scores with sd 0.02–0.03, and
+> because these covariates strongly predict the outcome, reweighting by that
+> noise biases IPW by a third of the effect size even when the true effect is
+> zero. Use the assignment probability you already know.
+
+### 17.5 A bug this test found on its first run
+
+Asking for 80,000 control-arm rows returned 12,078 — exactly the 15% control
+share. DuckDB applies `USING SAMPLE` to the table rather than the filtered
+result when the clause trails a `WHERE`, so `load_split('train', sample=100_000)`
+had been silently returning 59,758 rows. Fixed, and pinned by tests.
+
+It only bit when a split filter and a sample were used together, so the
+published model results are unaffected — but it is exactly the class of silent
+defect an A/A test is for, and no unit test had caught it.
