@@ -102,3 +102,32 @@ def test_limitations_section_exists_and_is_substantive():
     section = README.split("Honest limitations")[1]
     for required in ("indistinguishable", "exclusion restriction", "injected by me", "xfail"):
         assert required in section, f"limitations section missing: {required}"
+
+
+def test_the_advertised_test_count_matches_reality():
+    """A README that overstates its own test suite is the cheapest kind of
+    wrong. Pin the number so adding or removing a test forces an honest edit."""
+    import re
+    import subprocess
+
+    from uplift.config import REPO_ROOT
+
+    claimed = re.search(r"`make test` runs (\d+) tests", (REPO_ROOT / "README.md").read_text())
+    assert claimed, "README no longer states a test count"
+
+    out = subprocess.run(
+        ["uv", "run", "pytest", "--collect-only", "-q", "-p", "no:warnings"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+    ).stdout
+    # pytest -q --collect-only prints one "tests/test_x.py: N" line PER FILE,
+    # not one line per test id. Counting lines therefore yields the file count
+    # (15), which is how the first version of this check passed while the README
+    # claimed a completely different number.
+    per_file = re.findall(r"^tests/\S+\.py: (\d+)$", out, flags=re.M)
+    assert per_file, f"could not parse pytest collection output:\n{out[:400]}"
+    actual = sum(int(n) for n in per_file)
+    assert int(claimed.group(1)) == actual, (
+        f"README claims {claimed.group(1)} tests, the suite collects {actual}"
+    )
