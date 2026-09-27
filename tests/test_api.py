@@ -8,6 +8,10 @@ these tests are meaningful on a fresh clone as well as after a training run.
 from __future__ import annotations
 
 import pytest
+
+pytest.importorskip("fastapi", reason="install the `serve` extra to exercise the API")
+pytest.importorskip("httpx", reason="starlette's TestClient needs httpx")
+
 from fastapi.testclient import TestClient
 
 from uplift.api.main import app

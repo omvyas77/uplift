@@ -89,6 +89,10 @@ disallow_untyped_defs = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# `orchestration` is a top-level module, not part of the installed package -
+# Dagster loads it as `-m orchestration.definitions` from the repo root. Without
+# this, pytest cannot import it and the orchestration tests error out.
+pythonpath = ["."]
 addopts = "-q --strict-markers"
 markers = [
     "slow: requires the full dataset; excluded from CI",

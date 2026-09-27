@@ -10,7 +10,10 @@ jobs:
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-      - run: uv sync --frozen --extra causal --extra dev
+      # serve and orchestrate are NOT optional here. Without them the API
+      # tests cannot even be collected and the dashboard tests silently SKIP,
+      # so those modules would be linted but never actually exercised in CI.
+      - run: uv sync --frozen --extra causal --extra serve --extra orchestrate --extra dev
       - name: ruff
         run: |
           uv run ruff check src tests orchestration scripts
@@ -21,3 +24,13 @@ jobs:
         # Everything here runs on synthetic data with a known ground truth, so
         # CI never downloads the 311 MB source file.
         run: uv run pytest -m "not slow" --cov=src/uplift --cov-report=term-missing
+      - name: no tests were silently skipped
+        # A skipped test is not a passing test. If an optional dependency goes
+        # missing, the suite must go red rather than quietly shrink.
+        run: |
+          uv run pytest -m "not slow" -q --no-header -rs 2>&1 | tee /tmp/p.log
+          if grep -qE "^SKIPPED|[0-9]+ skipped" /tmp/p.log; then
+            echo "::error::tests were skipped in CI - see the reasons above"
+            grep -E "^SKIPPED" /tmp/p.log || true
+            exit 1
+          fi

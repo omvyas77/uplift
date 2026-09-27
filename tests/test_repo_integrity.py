@@ -38,10 +38,18 @@ def _is_git_repo() -> bool:
 pytestmark = pytest.mark.skipif(not _is_git_repo(), reason="not a git checkout")
 
 
-def test_every_source_file_is_tracked_by_git():
-    """The bug that motivated this file: source silently excluded by gitignore."""
-    tracked = set(_git("ls-files").splitlines())
-    untracked = []
+def test_no_source_file_is_invisible_to_git():
+    """The bug that motivated this file: source silently excluded by gitignore.
+
+    A file git has never seen is EITHER tracked OR reported as untracked. An
+    ignored file is in neither list - it is invisible, and that is precisely the
+    failure that shipped a repo missing `src/uplift/data/`. A brand-new file
+    that simply has not been `git add`ed yet is untracked, not invisible, so
+    this does not fire during normal work.
+    """
+    visible = set(_git("ls-files").splitlines())
+    visible |= set(_git("ls-files", "--others", "--exclude-standard").splitlines())
+    invisible = []
     for d in PACKAGE_DIRS:
         root = REPO_ROOT / d
         if not root.exists():
@@ -50,11 +58,11 @@ def test_every_source_file_is_tracked_by_git():
             if "__pycache__" in path.parts:
                 continue
             rel = path.relative_to(REPO_ROOT).as_posix()
-            if rel not in tracked:
-                untracked.append(rel)
-    assert not untracked, (
-        "these source files are not in git, so a clone cannot run them:\n  "
-        + "\n  ".join(sorted(untracked))
+            if rel not in visible:
+                invisible.append(rel)
+    assert not invisible, (
+        "these source files are invisible to git, so a clone cannot run them:\n  "
+        + "\n  ".join(sorted(invisible))
     )
 
 
