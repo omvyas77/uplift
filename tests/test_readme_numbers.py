@@ -72,13 +72,38 @@ def test_the_overlapping_model_is_reported_as_overlapping():
         assert name.replace("_", "-").split("-")[0].lower() in README.lower()
 
 
-def test_bias_table_numbers_are_current():
-    cau = _load("causal.json")
-    rows = {r["estimator"]: r for r in cau["bias_table"]["rows"]}
-    truth = rows["ground truth (from the RCT)"]["estimate"]
-    assert f"{truth:.6f}" in README
-    naive_rel = 100 * rows["naive difference-in-means"]["relative_error"]
-    assert f"{naive_rel:.0f}%" in README
+def test_the_superseded_bias_table_is_not_quoted_in_the_readme():
+    """The README used to claim matching recovered the truth to -13.6%.
+
+    That was disproven twice - matching estimates the ATT and was scored against
+    the ATE, and the adjusted estimators were scored against an unadjusted key.
+    A live incorrect claim on a public repo is the one defect here that can
+    actively cost something, so this test keeps it from coming back.
+    """
+    unicode_minus = "\u2212"
+    for dead in ("-13.6%", f"{unicode_minus}13.6%", "matching recovers", "matching beats AIPW"):
+        assert dead not in README, f"the README is making the superseded claim {dead!r}"
+
+
+def test_the_propensity_finding_matches_the_null_calibration():
+    """The README's headline finding must match evals/null_calibration.json."""
+    null = _load("null_calibration.json")
+    ipw_est = null["summary"]["ipw_estimated"]
+    ipw_orc = null["summary"]["ipw_oracle"]
+    # the claim: estimated propensity is badly biased, oracle is not
+    assert ipw_est["t_vs_zero_bias"] > 20
+    assert ipw_orc["t_vs_zero_bias"] < 3
+    assert null["verification"]["cross_fitting_is_real"]
+    assert null["verification"]["stabilized_matches_hajek"]
+
+
+def test_the_aa_test_numbers_are_current():
+    """The A/A corroboration the README cites."""
+    aa = _load("aa_test.json")
+    assert aa["summary"]["qini"]["is_null"], "README claims Qini is null under A/A"
+    assert not aa["summary"]["ipw_estimated"]["is_null"], (
+        "README claims IPW with an estimated propensity fails the A/A test"
+    )
 
 
 def test_iv_numbers_are_current():

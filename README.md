@@ -18,7 +18,7 @@ randomization away — and then built the targeting system on what survived.**
 | ATE on `visit` | **+20.2% relative** (adjusted) · +27.1% unadjusted — [why the adjusted one](#the-number-to-quote-is-202-not-271) |
 | Best uplift model | S-learner, Qini **0.0893** [95% CI +0.0779, +0.1005] |
 | Models statistically indistinguishable | **DR-learner vs T-learner** (+0.0040, CI crosses 0) |
-| Naive observational bias | **−705%, and sign-flipped**; matching recovers to −13.6% |
+| Propensity scores on randomized data | **biases IPW by −91%** (\|t\|=43) while every overlap diagnostic reads healthy |
 | Design efficiency | 85/15 is **51%** as efficient as 50/50 |
 | Variance reduction (CUPAC) | **30.9%** (= ρ², ρ = 0.556) ≈ 1.45× sample |
 | Delivery rate | **3.6%** of targeted users were ever shown an ad |
@@ -60,31 +60,52 @@ leverage is.
 > held-out rows. Publishing this leaderboard without intervals would have
 > declared a winner over a gap the data cannot resolve.
 
-## The bias table — the artifact this repo exists for
+The intervals are the evidence: the S-learner's **[+0.0779, +0.1005]** excludes
+zero comfortably. An A/A test corroborates it independently — Qini under a true
+null is **+0.0004** (§17) — but the bootstrap CI is the number to quote.
+
+## The finding: don't estimate a propensity score on randomized data
 
 Take the RCT. Deliberately destroy the randomization by keeping units as a
 function of their covariates. Run the observational toolkit on the wreckage.
 Compare to the answer you already had.
 
-| Estimator | Estimate | Bias | Relative error |
-|---|---|---|---|
-| Ground truth (from the RCT) | 0.005314 | — | — |
-| **Naive difference-in-means** | −0.032148 | −0.037462 | **−705%** |
-| IPW (clipped, stabilized) | 0.001404 | −0.003910 | −73.6% |
-| **Propensity matching (1:1)** | 0.004590 | −0.000724 | **−13.6%** |
-| AIPW / doubly robust | 0.002641 | −0.002673 | −50.3% |
+Doing that produced a bias table in which every adjusted estimator looked
+broken. Diagnosing *why* took three passes and overturned it twice. The
+[full revision trail is in docs/findings.md](docs/findings.md) §12–17; the
+result that survived is this:
 
-The naive comparison is not merely mis-scaled — it is **sign-flipped**, reporting
-a negative effect where the truth is positive.
+**A propensity model fitted to randomized data has nothing to learn — and the
+noise it returns instead is not harmless.**
 
-Two honest departures from the textbook: **matching beats AIPW here** (AIPW is
-nonetheless the only estimator whose bias does not grow as overlap collapses,
-and is best at strength 4.0), and relative errors are inflated by a small
-denominator because the s(X)-weighting halves the target.
+| | |
+|---|---|
+| corr(ps, **treatment**) — what it is meant to predict | **+0.008** |
+| corr(ps, **outcome**) | **+0.104** |
+| corr(control-arm IPW weight, outcome) | **+0.152** |
+| propensity model AUC | 0.504 |
 
-At confounding strength 0 the naive bias is **+0.000040** — the apparatus
-validating itself. If that row were not ~0, the table would be measuring its own
-bug.
+The score is **13× more correlated with the outcome than with treatment**.
+Because the control arm carries weights of 1/(1−ps) ≈ 6.6, that correlation
+inflates the weighted control mean and collapses the estimate:
+
+| propensity used | IPW estimate | truth |
+|---|---|---|
+| true constant (0.8501) | 0.010177 | 0.009798 |
+| **estimated (LightGBM)** | **0.000699** | 0.009798 |
+
+Established three independent ways: a 20-seed null calibration (**\|t\| = 43**),
+an oracle-versus-estimated comparison, and an **A/A test** in which the true
+effect is exactly zero and IPW still returns −0.00289 at \|t\| = 11.5
+(§17). **AIPW with the same estimated score is fine** — double robustness doing
+its job, the outcome model carrying the estimate when the propensity is noise.
+
+Every standard positivity check reads healthy while this happens: ESS/n is 0.92,
+0.03% of units are clipped, and the arms' propensity distributions overlap. The
+diagnostics are blind to it, because what governs the damage is corr(ps, y) —
+which no positivity check measures.
+
+**Use the assignment probability you already know.**
 
 ## The `exposure` trap
 
@@ -154,7 +175,7 @@ by `python scripts/deploy_space.py`, which assembles a self-contained payload
 from this repo. It runs the *same* dashboard module as `make dashboard` via a
 thin entrypoint, so the live page and the local one cannot drift.
 
-`make test` runs 157 tests on synthetic data with known ground truth — CI never
+`make test` runs 159 tests on synthetic data with known ground truth — CI never
 downloads the 311 MB source file. (The count is pinned by a test, so it cannot
 drift from reality.)
 

@@ -349,6 +349,12 @@ comparisons is the T-learner.
 \* Response AUC measures who RESPONDS, not who responds BECAUSE OF treatment. It
 is reported only so it can be labelled as not the objective.
 
+**Read the intervals, not the ordering.** The bootstrap CIs above are the
+primary evidence that these models measure anything: the S-learner's
+[+0.0779, +0.1005] excludes zero comfortably. The A/A test (section 17)
+corroborates it from the other side — Qini under a true null is +0.0004 — but
+the CI is the number to quote.
+
 Two things worth stating plainly:
 
 - **The DR-learner is not distinguishable from the T-learner** (+0.0038, CI
@@ -366,6 +372,21 @@ Two things worth stating plainly:
 ---
 
 ## 12. The bias table — observational estimators against RCT ground truth
+
+> ## ⚠️ SUPERSEDED — see sections 16 and 17
+>
+> This section's bias table is **wrong**, in two independent ways, and the
+> numbers in it should not be quoted:
+>
+> * matching was scored against the **ATE** while it estimates the **ATT**
+>   (section 15.1), and
+> * every *adjusted* estimator was scored against an **unadjusted** answer key,
+>   which charged it for the covariate adjustment (section 16.3).
+>
+> Corrected, AIPW recovers the truth to **−0.7%** and the "matching wins"
+> result disappears. The section is kept because the revision trail is the
+> honest record of how the result was arrived at.
+
 
 Confounding injected at strength 1.0 on 2M rows; 1,052,060 survive the selection.
 Ground truth is the s(X)-weighted ATE computed from the RCT, which is the correct
@@ -434,6 +455,10 @@ propensity model fitted on the confounded slice also absorbs part of the file's
 native imbalance.
 
 ## 13. ITT vs CACE vs the invalid comparison
+
+> **Note.** The ITT/CACE numbers here stand; they do not depend on the bias
+> table. Only the bias table in section 12 is superseded.
+
 
 ```
 ITT                        +0.010473  [+0.009715, +0.011231]   always valid
@@ -736,8 +761,12 @@ exists to rule out, and it is ruled out.
 
 ### 17.2 The reported Qini is not an artifact
 
-**Qini under a true null is +0.0004, indistinguishable from zero.** The measured
-0.0893 on the test split is therefore real signal, not pipeline residue.
+**The primary evidence that the models measure something is the bootstrap CI:
+the S-learner's Qini is 0.0893 with a 95% interval of [+0.0779, +0.1005], which
+excludes zero comfortably.** The A/A result corroborates that independently from
+the other side — Qini under a true null is **+0.0004**, indistinguishable from
+zero — so the measured value is not pipeline residue. Lead with the interval;
+the null is the check on it, not the headline.
 
 The SD of 0.0134 at 160,000 test rows is the Qini **noise floor**, and it
 scales as 1/√n. On the real 2,796,413-row test split that is roughly
@@ -753,14 +782,26 @@ partly no.
 
 ### 17.3 Independent confirmation of the covariate imbalance
 
-The A/A split uses the **same features** with a **genuinely random** assignment.
-Its max \|SMD\| is **0.0076**. The real assignment's is **0.0488** — six times
-larger, on identical code.
+The A/A split uses the **same features** with a **genuinely random** assignment,
+through the same code. The right comparison is in standard deviations, not as a
+ratio — an SMD's standard error depends on the arm sizes, and the two runs have
+very different ones:
 
-That is section 3 confirmed by a third method, and it disposes of the remaining
-alternative explanation: the imbalance is not an artifact of how `balance.py`
-computes SMDs, because the same function on the same columns returns a clean
-number when the assignment really is random.
+| | n treated | n control | SE(SMD) | max \|SMD\| | in SD |
+|---|---|---|---|---|---|
+| Real assignment | 11,882,655 | 2,096,937 | 7.5e-4 | 0.0488 | **65.2** |
+| A/A (fake) | 340,000 | 60,000 | 4.4e-3 | 0.0076 | **1.7** |
+
+The A/A's 0.0076 is **its own noise floor** — the expected maximum of twelve
+draws from N(0, 4.4e-3) is about 0.0102, so the observed value is if anything on
+the low side of chance. The real file's 0.0488 is **65 standard deviations** out.
+
+Quoting these as "six times larger" would have understated it and compared two
+quantities with different sampling variances. That is section 3 confirmed by a
+third method, and it disposes of the remaining alternative explanation: the
+imbalance is not an artifact of how `balance.py` computes SMDs, because the same
+function on the same columns returns pure noise when the assignment really is
+random.
 
 ### 17.4 IPW with an estimated propensity fails, unambiguously
 
@@ -783,6 +824,31 @@ and an A/A test that cannot be argued with.
 > because these covariates strongly predict the outcome, reweighting by that
 > noise biases IPW by a third of the effect size even when the true effect is
 > zero. Use the assignment probability you already know.
+
+### 17.6 The mechanism, measured
+
+Why the noise is not harmless, at strength 0:
+
+| quantity | value |
+|---|---|
+| corr(ps, **treatment**) — what the model is fitted to predict | **+0.008** |
+| corr(ps, **outcome**) | **+0.104** |
+| — within treated / within control | +0.109 / +0.067 |
+| corr(control-arm weight 1/(1−ps), outcome) | **+0.152** |
+| ps quantiles p1 / p50 / p99 / max | 0.763 / 0.850 / 0.939 / 0.992 |
+| fraction above 0.98 | 0.015% |
+
+**The score is 13× more correlated with the outcome than with the treatment it
+was fitted to predict.** That is the whole mechanism. The control arm carries
+weights of 1/(1−ps) ≈ 6.6, so a +0.15 correlation between weight and outcome
+inflates the weighted control mean and collapses the treated-minus-control
+difference from 0.0098 to 0.0007.
+
+Note what is *not* driving it: only 0.015% of units exceed 0.98, and the
+distribution is tight around 0.85. This is not an extreme-weights problem that
+trimming would fix — it is the bulk correlation. Which is precisely why the
+standard positivity diagnostics miss it: ESS/n is 0.92, clipping is 0.03%, and
+the arms overlap. **None of them measure corr(ps, y).**
 
 ### 17.5 A bug this test found on its first run
 
