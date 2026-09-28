@@ -860,3 +860,59 @@ had been silently returning 59,758 rows. Fixed, and pinned by tests.
 It only bit when a split filter and a sample were used together, so the
 published model results are unaffected — but it is exactly the class of silent
 defect an A/A test is for, and no unit test had caught it.
+
+---
+
+## 18. The policy comparison used the wrong standard error
+
+The reported "model targeting beats random at the same budget by 12.8 standard
+errors" added the two policies' standard errors in quadrature:
+
+```python
+se_diff = sqrt(se_model**2 + se_random**2)  # assumes independence
+```
+
+Both policies are evaluated on the **same units**, and their per-unit
+doubly-robust scores correlate at **+0.81**. Ignoring that covariance inflates
+the standard error, so the published figure was **conservative**, not
+overstated:
+
+| | difference | SE | \|t\| |
+|---|---|---|---|
+| Independent SEs (as published) | +0.007246 | 0.000564 | 12.9 |
+| **Paired (correct)** | +0.007246 | **0.000445** | **16.3** |
+
+`paired_policy_difference()` now computes the per-unit score difference directly
+and reports both, so the size of the correction stays visible.
+
+### 18.1 The apparent contradiction, resolved
+
+It looked inconsistent to claim that six uplift models are barely
+distinguishable from one another while a model-based policy beats random by
+sixteen standard errors. They are different comparisons:
+
+- **Qini pairwise** asks whether model A ranks better than model B. The answer is
+  mostly no — the models agree far more than they differ.
+- **Policy versus random** asks whether *any* ranking beats *no* ranking. That is
+  a much larger contrast, and the answer is emphatically yes.
+
+Both can hold at once, and here both do.
+
+### 18.2 The budget decomposition
+
+| Policy | Treated | Value (DR) |
+|---|---|---|
+| Treat nobody | 0% | 0.03796 |
+| **Random at 18.1%** | 18.1% | 0.03990 |
+| **Model targeting** | 18.1% | **0.04715** |
+| Treat everybody | 100% | 0.04838 |
+
+Reading it properly: moving from random to model targeting **at a fixed 18.1%
+budget** gains +0.00725, which is the ranking doing work. Treating everybody
+gains only a further +0.00123 while treating 5.5× as many users. So the model
+captures **97.5% of the blanket-treatment value at 18.1% of the volume**.
+
+The gain is therefore *both* effects, and they are separable: the ranking is
+what beats random at equal budget, and the budget reduction is what makes it
+efficient. Quoting only "beats random" would hide that treat-everybody still has
+the highest raw value.

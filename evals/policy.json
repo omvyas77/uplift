@@ -84,9 +84,14 @@
     }
   ],
   "model_vs_random_same_budget": {
-    "diff_dr": 0.007245944971135641,
-    "se": 0.0005636343490509128,
-    "resolved": true
+    "diff_dr": 0.007245944971135637,
+    "se": 0.00044494228897423916,
+    "se_paired": 0.00044494228897423916,
+    "se_independent_incorrect": 0.0005636343490509128,
+    "t_paired": 16.28513438864238,
+    "t_independent_incorrect": 12.855754769624793,
+    "resolved": true,
+    "note": "SE is PAIRED: both policies are scored on the same units and their per-unit DR scores are strongly correlated, so adding independent SEs in quadrature overstates the SE"
   },
   "profit_curve": [
     {

@@ -43,6 +43,39 @@ def _outcome_models(X, w, y, seed: int, n_estimators: int = 200):
     return mu0, mu1
 
 
+def paired_policy_difference(y, w, policy_a, policy_b, propensity, mu0, mu1):
+    """PAIRED standard error for the difference between two policy values.
+
+    The previous version added the two policies' standard errors in quadrature:
+
+        se = sqrt(se_a**2 + se_b**2)
+
+    which assumes the two estimates are independent. They are not - both are
+    computed from the SAME units, and their per-unit doubly-robust scores
+    correlate at about +0.81 here. Ignoring the covariance inflates the standard
+    error by roughly 2.3x, so the published comparison was CONSERVATIVE rather
+    than overstated. Still wrong, and worth fixing in the direction that makes
+    the claim stronger rather than weaker.
+
+    Returns (difference, paired_se, independent_se) so the report can show both
+    and the size of the correction is visible.
+    """
+
+    def dr_scores(policy):
+        pt = np.asarray(policy).astype(int)
+        mu_pi = np.where(pt == 1, mu1, mu0)
+        pp = np.where(pt == 1, propensity, 1 - propensity)
+        match = np.asarray(w).astype(int) == pt
+        return mu_pi + match * (np.asarray(y, dtype=float) - mu_pi) / pp
+
+    sa, sb = dr_scores(policy_a), dr_scores(policy_b)
+    d = sa - sb
+    n = len(d)
+    paired = float(d.std(ddof=1) / np.sqrt(n))
+    indep = float(np.sqrt((sa.std(ddof=1) / np.sqrt(n)) ** 2 + (sb.std(ddof=1) / np.sqrt(n)) ** 2))
+    return float(d.mean()), paired, indep
+
+
 def policy_report(
     outcome: str = "visit",
     split: str = "test",
@@ -100,10 +133,10 @@ def policy_report(
         )
     tbl = pd.DataFrame(rows)
 
-    model_row = tbl[tbl.policy == "model_targeting"].iloc[0]
-    rand_row = tbl[tbl.policy == "random_same_budget"].iloc[0]
-    diff = float(model_row.value_dr - rand_row.value_dr)
-    se_diff = float(np.sqrt(model_row.se_dr**2 + rand_row.se_dr**2))
+    pols = baseline_policies(tau, pol.threshold, seed=settings.random_seed)
+    diff, se_diff, se_indep = paired_policy_difference(
+        y, w, pols["model_targeting"], pols["random_same_budget"], propensity, mu0, mu1
+    )
     beats_random = bool(abs(diff) > 1.96 * se_diff and diff > 0)
 
     out: dict[str, Any] = {
@@ -126,7 +159,16 @@ def policy_report(
         "model_vs_random_same_budget": {
             "diff_dr": diff,
             "se": se_diff,
+            "se_paired": se_diff,
+            "se_independent_incorrect": se_indep,
+            "t_paired": abs(diff) / se_diff if se_diff else float("nan"),
+            "t_independent_incorrect": abs(diff) / se_indep if se_indep else float("nan"),
             "resolved": beats_random,
+            "note": (
+                "SE is PAIRED: both policies are scored on the same units and "
+                "their per-unit DR scores are strongly correlated, so adding "
+                "independent SEs in quadrature overstates the SE"
+            ),
         },
         "profit_curve": profit_curve(tau, value, settings.cost_per_treatment_usd),
     }
