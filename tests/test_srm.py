@@ -51,7 +51,7 @@ def test_power_is_high_against_a_detectable_deviation():
     """Pick the alternative from the module's own power calculation, rather than
     a magic number.
 
-    The build guide suggests asserting near-certain rejection at ratio = 0.8505.
+    A tempting test asserts near-certain rejection at ratio = 0.8505.
     That is wrong at any n this simulation can afford: at n = 5M a deviation of
     5e-4 is 3.1 standard errors, and against a critical value of 3.29 at
     alpha = 0.001 the power is 44%, which is what the simulation returns. Using

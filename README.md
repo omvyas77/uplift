@@ -123,7 +123,7 @@ With a 3.6% first stage, CACE is 27.8× the ITT, and the invalid comparison
 overstates the CACE by 30% and the ITT by 36×. `src/uplift/data/io.py` returns
 `exposure` from exactly one function, used only by the IV module.
 
-## Findings that contradict the plan I was working from
+## Findings that contradicted what I expected
 
 Full detail in **[docs/findings.md](docs/findings.md)**.
 

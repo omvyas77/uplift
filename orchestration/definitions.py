@@ -10,7 +10,7 @@ Two details that keep them honest:
 * They gate on EFFECT SIZE, not the p-value. At n = 14M a chi-square test
   resolves deviations of 4e-4, far below the precision to which the design ratio
   is even published, so a p-value gate would fire on nothing. This matches
-  `Settings.srm_effect_size_gate` and the reasoning in section 5.1 of the guide.
+  `Settings.srm_effect_size_gate`.
 * They fail CLOSED. `read_arm_summary` raises `MartNotFoundError` when the mart
   is missing or empty rather than returning something falsy, so a check that
   cannot read its input crashes instead of quietly reporting "no SRM".

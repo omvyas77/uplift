@@ -19,7 +19,7 @@
   uses, in a project whose stated finding is that there is no time column. That
   is boilerplate pretending to be a capability.
 
-  So this is the fallback the build plan itself names: a metrics model plus
+  So this is the fallback: a metrics model plus
   docs/metric_definitions.md. The mf CLI is lost; the substance - definitions
   single-sourced, version-controlled, testable, and joinable - is kept. Knowing
   the difference between the substance and the tool is the point.

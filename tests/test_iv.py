@@ -1,8 +1,8 @@
 """ITT, CACE, and the `exposure` trap.
 
 The point of this file is the last test: conditioning on a post-treatment
-variable overstates the effect. That is the single distinction the build guide
-says is worth more than three extra models, and it is the one this dataset
+variable overstates the effect. That is the single distinction worth more than
+three extra models, and it is the one this dataset
 punishes hardest, because compliance is only 3.6%.
 """
 

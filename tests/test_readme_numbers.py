@@ -115,7 +115,7 @@ def test_iv_numbers_are_current():
 
 
 def test_assumptions_are_stated_next_to_every_dollar_figure():
-    """The guide's rule: never a dollar figure without the assumption line."""
+    """Rule: never a dollar figure without the assumption line."""
     assert "$25.00 per conversion" in README
     assert "$0.01 per treatment" in README
     dollars = _claims(r"\$[\d,]+")

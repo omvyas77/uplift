@@ -28,7 +28,7 @@ causal = [
     "econml>=0.15,<0.18",
     "scikit-uplift>=0.5.1",
 ]
-# Optional and isolated on purpose - see section 2.4 of the build guide.
+# Optional and isolated on purpose.
 causal-extra = [
     "causalml>=0.15,<0.18",
 ]

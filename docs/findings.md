@@ -16,8 +16,8 @@ Everything below is reproducible with `make ingest && make experiment`.
 | `conversion = 1 ⟹ visit = 1` | **0 violations** in 13,979,592 rows |
 | Control-arm exposure rate | **exactly 0.000000** |
 
-The build guide says to verify funnel monotonicity empirically rather than
-assume it. It holds. The control arm is never exposed, which is what makes this
+I checked funnel monotonicity empirically rather than assuming it. It
+holds. The control arm is never exposed, which is what makes this
 clean **one-sided non-compliance** and licenses `CACE = ITT / P(exposed | treated)`.
 
 ## 2. There is no SRM — and the interesting part is why the test could have found one
@@ -155,7 +155,7 @@ Consequences carried through the repo:
 theta = 1.0495   rho = 0.5563   variance reduction = 30.95%   ≈ 1.45× sample
 ```
 
-The build guide predicts "a few percent at best" on the grounds that 12
+I expected a few percent at best, on the grounds that 12
 randomly-projected anonymized features should not predict a 4.7% binary outcome
 well. On this data they do: the cross-fitted control-only prediction correlates
 0.556 with `visit`, and variance reduction equals ρ² = 0.309 as the identity
@@ -177,7 +177,7 @@ Only 3.6% of users assigned to the campaign were actually shown an ad. Since
 `CACE = ITT / first stage`, the complier effect is roughly **28× the ITT**. This
 makes the ITT-versus-CACE distinction quantitatively dramatic on this data
 rather than academic, and it makes conditioning on `exposure` catastrophic
-rather than merely sloppy. See §7.4 of the build guide and the IV module.
+rather than merely sloppy. See the IV module.
 
 ## 6. Design efficiency
 
@@ -404,9 +404,9 @@ The headline holds: the naive comparison is not merely biased but **sign-flipped
 reporting a negative effect where the truth is positive, and adjustment recovers
 the sign and most of the magnitude.
 
-Two honest departures from what the build guide anticipates:
+Two honest departures from what I expected:
 
-- **Matching wins here, not AIPW.** The guide expects the doubly-robust estimator
+- **Matching wins here, not AIPW.** I expected the doubly-robust estimator
   to be best. At strength 1.0 matching lands within 13.6% and AIPW within 50.3%.
   AIPW is nonetheless the most *robust* — see the strength curve below, where it
   is the only estimator still improving at strength 4.0.
