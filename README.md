@@ -23,6 +23,8 @@ randomization away — and then built the targeting system on what survived.**
 | Variance reduction (CUPAC) | **30.9%** (= ρ², ρ = 0.556) ≈ 1.45× sample |
 | Delivery rate | **3.6%** of targeted users were ever shown an ad |
 
+![The uplift dashboard](docs/images/dashboard.png)
+
 ## What a marketing dashboard would have said, and what is true
 
 Of the **576,824 visits** in the treated arm, roughly **92,000 were actually
